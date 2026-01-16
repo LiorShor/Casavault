@@ -6,13 +6,35 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
+@ViewAction(for: Splash.self)
 struct SplashView: View {
+    
+    let store: StoreOf<Splash>
+    
+    init(store: StoreOf<Splash>) {
+        self.store = store
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ZStack {
+            Image(".splashLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 200)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .foregroundStyle(".background")
+        .onAppear { send(.onAppear) }
     }
 }
 
 #Preview {
-    SplashView()
+    SplashView(
+        store: Store(
+            initialState: Splash.State(),
+            reducer: Splash.init
+        )
+    )
 }

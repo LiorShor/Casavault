@@ -9,7 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 
 @main
-struct StorePassApp: View {
+struct StorePassApp: App {
 //    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
@@ -22,8 +22,4 @@ struct StorePassApp: View {
             )
         }
     }
-}
-
-#Preview {
-    StorePassApp()
 }

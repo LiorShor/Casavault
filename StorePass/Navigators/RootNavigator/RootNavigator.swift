@@ -24,6 +24,9 @@ struct RootNavigator {
     enum Action {
         case destination(Destination.Action)
     }
+    
+    public init() {}
+
         
     var body: some Reducer<State, Action> {
         Scope(state: \.destination, action: \.destination, child: Destination.init)

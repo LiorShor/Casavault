@@ -9,6 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 
 extension HomeNavigator {
+
     struct ContentView: View {
         
         @Bindable var store: StoreOf<HomeNavigator>
