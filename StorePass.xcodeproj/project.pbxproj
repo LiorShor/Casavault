@@ -3,8 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		BA86A00F2F194C04004BC59C /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = BA86A00E2F194C04004BC59C /* ComposableArchitecture */; };
+		BA86A0682F196151004BC59C /* Localization in Frameworks */ = {isa = PBXBuildFile; productRef = BA86A0672F196151004BC59C /* Localization */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BA75DBE42F194A7600816228 /* StorePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StorePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -34,10 +39,10 @@
 /* Begin PBXFrameworksBuildPhase section */
 		BA75DBE12F194A7600816228 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
+				BA86A00F2F194C04004BC59C /* ComposableArchitecture in Frameworks */,
+				BA86A0682F196151004BC59C /* Localization in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -71,13 +76,13 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				BA75DBE62F194A7600816228 /* StorePass */,
 			);
 			name = StorePass;
 			packageProductDependencies = (
+				BA86A00E2F194C04004BC59C /* ComposableArchitecture */,
+				BA86A0672F196151004BC59C /* Localization */,
 			);
 			productName = StorePass;
 			productReference = BA75DBE42F194A7600816228 /* StorePass.app */;
@@ -95,6 +100,7 @@
 				TargetAttributes = {
 					BA75DBE32F194A7600816228 = {
 						CreatedOnToolsVersion = 26.2;
+						LastSwiftMigration = 2620;
 					};
 				};
 			};
@@ -107,7 +113,11 @@
 			);
 			mainGroup = BA75DBDB2F194A7600816228;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			packageReferences = (
+				BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				BA86A0662F196151004BC59C /* XCRemoteSwiftPackageReference "swift-localization" */,
+			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = BA75DBE52F194A7600816228 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -120,29 +130,26 @@
 /* Begin PBXResourcesBuildPhase section */
 		BA75DBE22F194A7600816228 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		BA75DBE02F194A7600816228 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		BA75DBF32F194A7800816228 /* Debug */ = {
+		BA75DBF32F194A7800816228 /* Debug configuration for PBXNativeTarget "StorePass" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorePass/StorePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -166,17 +173,19 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		BA75DBF42F194A7800816228 /* Release */ = {
+		BA75DBF42F194A7800816228 /* Release configuration for PBXNativeTarget "StorePass" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = StorePass/StorePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -206,7 +215,7 @@
 			};
 			name = Release;
 		};
-		BA75DBF52F194A7800816228 /* Debug */ = {
+		BA75DBF52F194A7800816228 /* Debug configuration for PBXProject "StorePass" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -266,11 +275,12 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		BA75DBF62F194A7800816228 /* Release */ = {
+		BA75DBF62F194A7800816228 /* Release configuration for PBXProject "StorePass" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -323,6 +333,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -333,22 +344,52 @@
 		BA75DBDF2F194A7600816228 /* Build configuration list for PBXProject "StorePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BA75DBF52F194A7800816228 /* Debug */,
-				BA75DBF62F194A7800816228 /* Release */,
+				BA75DBF52F194A7800816228 /* Debug configuration for PBXProject "StorePass" */,
+				BA75DBF62F194A7800816228 /* Release configuration for PBXProject "StorePass" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		BA75DBF22F194A7800816228 /* Build configuration list for PBXNativeTarget "StorePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BA75DBF32F194A7800816228 /* Debug */,
-				BA75DBF42F194A7800816228 /* Release */,
+				BA75DBF32F194A7800816228 /* Debug configuration for PBXNativeTarget "StorePass" */,
+				BA75DBF42F194A7800816228 /* Release configuration for PBXNativeTarget "StorePass" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.23.1;
+			};
+		};
+		BA86A0662F196151004BC59C /* XCRemoteSwiftPackageReference "swift-localization" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TelemTobi/swift-localization.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BA86A00E2F194C04004BC59C /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		BA86A0672F196151004BC59C /* Localization */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BA86A0662F196151004BC59C /* XCRemoteSwiftPackageReference "swift-localization" */;
+			productName = Localization;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BA75DBDC2F194A7600816228 /* Project object */;
 }
