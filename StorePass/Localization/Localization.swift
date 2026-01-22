@@ -11,7 +11,15 @@ import SwiftUI
 
 @Localizable
 public enum Localization {
-   case passwords
+    case addPassword
+    case passwords
+    case passwordDetails
+    case setupCode
+    case setupCodeInstructions
+    case enterDeviceTitle
+    case deviceNamePlaceholder
+    case continueButton
+    case closeButton
 }
 
 public extension String {
