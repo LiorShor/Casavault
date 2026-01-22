@@ -11,6 +11,8 @@ import SwiftData
 
 struct PasswordsUseCases {
     var fetchPasswords: () async -> [Password]
+    var addPassword: (Password) async -> Void
+    var removePassword: (Password) async -> Void
 }
 
 extension PasswordsUseCases: DependencyKey {
@@ -19,7 +21,22 @@ extension PasswordsUseCases: DependencyKey {
             @Dependency(\.swiftData) var db
             do { return try db.fetchAll() }
                 catch { return [] }
+            },
+        addPassword: { password in
+            @Dependency(\.swiftData) var db
+            do { return try db.add(password) }
+            catch {
+                
             }
+        },
+        removePassword: { password in
+            @Dependency(\.swiftData) var db
+            do { 
+                try db.delete(password)
+            } catch {
+                // Handle error if needed
+            }
+        }
         
     )
     
