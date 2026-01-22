@@ -16,8 +16,8 @@ struct RootNavigator {
     struct State: Equatable {
         var destination: Destination.State
         
-        init(destination: Destination.State = .splash(Splash.State())) {
-            self.destination = destination
+        init(destination: Destination.State? = nil) {
+            self.destination = destination ?? .splash(Splash.State())
         }
     }
     
