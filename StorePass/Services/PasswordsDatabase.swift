@@ -17,10 +17,10 @@ extension DependencyValues {
 }
 
 struct PasswordsDatabase {
-    var fetchAll: @Sendable () throws -> [Password]
-    var fetch: @Sendable (FetchDescriptor<Password>) throws -> [Password]
-    var add: @Sendable (Password) throws -> Void
-    var delete: @Sendable (Password) throws -> Void
+    var fetchAll: @MainActor @Sendable () throws -> [Password]
+    var fetch: @MainActor @Sendable (FetchDescriptor<Password>) throws -> [Password]
+    var add: @MainActor @Sendable (Password) throws -> Void
+    var delete: @MainActor @Sendable (Password) throws -> Void
 
     enum PasswordError: Error {
         case add
@@ -30,7 +30,7 @@ struct PasswordsDatabase {
 
 extension PasswordsDatabase: DependencyKey {
     public static let liveValue = Self(
-        fetchAll: {
+        fetchAll: { @MainActor in
             do {
                 @Dependency(\.databaseService.context) var context
                 let movieContext = try context()
@@ -41,7 +41,7 @@ extension PasswordsDatabase: DependencyKey {
                 return []
             }
         },
-        fetch: { descriptor in
+        fetch: { @MainActor descriptor in
             do {
                 @Dependency(\.databaseService.context) var context
                 let movieContext = try context()
@@ -50,7 +50,7 @@ extension PasswordsDatabase: DependencyKey {
                 return []
             }
         },
-        add: { model in
+        add: { @MainActor model in
             do {
                 @Dependency(\.databaseService.context) var context
                 let movieContext = try context()
@@ -60,7 +60,7 @@ extension PasswordsDatabase: DependencyKey {
                 throw PasswordError.add
             }
         },
-        delete: { model in
+        delete: { @MainActor model in
             do {
                 @Dependency(\.databaseService.context) var context
                 let movieContext = try context()
