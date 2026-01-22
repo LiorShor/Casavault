@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 @Model
-class Password: Equatable, Identifiable {
+final class Password: Equatable, Identifiable {
     
     var id: UUID
     var name: String
