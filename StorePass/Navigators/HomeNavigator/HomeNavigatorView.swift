@@ -23,23 +23,10 @@ extension HomeNavigator {
         var body: some View {
             TabView(selection: $store.selectedTab.sending(\.onTabSelection)) {
                 Tab(.localized(.passwords), systemImage: "list.bullet", value: TabType.passwords) {
-                    //                    MoviesNavigator.ContentView(
-                    //                        store: store.scope(state: \.movies, action: \.movies)
-                    //                    )
+                    PasswordsNavigator.ContentView(
+                        store: store.scope(state: \.passwords, action: \.passwords)
+                    )
                 }
-                //
-                //                Tab(.localized(.tvShows), systemImage: "tv", value: TabType.tvShows) {
-                //                    Color.clear
-                //                }
-                //
-                //                Tab(.localized(.search), systemImage: "magnifyingglass", value: TabType.search, role: .search) {
-                //                    SearchNavigator.ContentView(
-                //                        store: store.scope(state: \.search, action: \.search)
-                //                    )
-                //                }
-                //            }
-                //            .environment(\.namespace, transitionNamespace)
-                //        }
             }
         }
     }
