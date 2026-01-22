@@ -32,7 +32,6 @@ struct Database {
 }
 
 extension Database: DependencyKey {
-    @MainActor
     public static let liveValue = Self(
         context: { sharedContext }
     )
