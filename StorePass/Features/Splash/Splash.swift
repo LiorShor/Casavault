@@ -7,7 +7,6 @@
 
 import ComposableArchitecture
 
-@MainActor
 @Reducer
 struct Splash {
     @ObservableState
