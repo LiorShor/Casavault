@@ -17,6 +17,7 @@ public enum Localization {
     case setupCode
     case setupCodeInstructions
     case enterDeviceTitle
+    case deviceCodePlaceholder
     case deviceNamePlaceholder
     case continueButton
     case closeButton
