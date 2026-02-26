@@ -14,8 +14,6 @@ extension HomeNavigator {
         
         @Bindable var store: StoreOf<HomeNavigator>
         
-        //        @Namespace var transitionNamespace
-        //        
         init(store: StoreOf<HomeNavigator>) {
             self.store = store
         }

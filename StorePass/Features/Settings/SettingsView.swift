@@ -46,6 +46,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "globe")
                                 .foregroundStyle(.blue)
+                                .frame(width: 24)
                             Text(.localized(.language))
                                 .foregroundStyle(.primary)
                             
@@ -74,6 +75,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "homekit")
                                 .foregroundStyle(.blue)
+                                .frame(width: 24)
                             Text(.localized(.homeKitImport))
                                 .foregroundStyle(.primary)
                         }
@@ -85,12 +87,13 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "square.and.arrow.up")
                                 .foregroundStyle(.blue)
+                                .frame(width: 24)
                             Text(.localized(.exportPasswords))
                                 .foregroundStyle(.primary)
                             
                             if store.isExportingPasswords {
-                                Spacer()
                                 ProgressView()
+                                    .frame(maxWidth: .infinity, alignment: .trailing)
                             }
                         }
                     }
