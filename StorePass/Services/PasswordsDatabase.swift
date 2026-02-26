@@ -21,10 +21,12 @@ struct PasswordsDatabase {
     var fetch: @MainActor @Sendable (FetchDescriptor<Password>) throws -> [Password]
     var add: @MainActor @Sendable (Password) throws -> Void
     var delete: @MainActor @Sendable (Password) throws -> Void
+    var update: @MainActor @Sendable (Password) throws -> Void
 
     enum PasswordError: Error {
         case add
         case delete
+        case update
     }
 }
 
@@ -70,6 +72,18 @@ extension PasswordsDatabase: DependencyKey {
             } catch {
                 throw PasswordError.delete
             }
+        },
+        update: { @MainActor model in
+            do {
+                @Dependency(\.databaseService.context) var context
+                let movieContext = try context()
+                
+                // SwiftData automatically tracks changes to model objects
+                // We just need to ensure the context saves
+                try movieContext.save()
+            } catch {
+                throw PasswordError.update
+            }
         }
     )
 }
@@ -80,14 +94,16 @@ extension PasswordsDatabase: TestDependencyKey {
         fetchAll: unimplemented("\(Self.self).fetch"),
         fetch: unimplemented("\(Self.self).fetchDescriptor"),
         add: unimplemented("\(Self.self).add"),
-        delete: unimplemented("\(Self.self).delete")
+        delete: unimplemented("\(Self.self).delete"),
+        update: unimplemented("\(Self.self).update")
     )
     
     static let noop = Self(
         fetchAll: { [] },
         fetch: { _ in [] },
         add: { _ in },
-        delete: { _ in }
+        delete: { _ in },
+        update: { _ in }
     )
 }
 

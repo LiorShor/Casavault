@@ -23,16 +23,22 @@ extension PasswordsNavigator {
                 PasswordsCollectionView(
                     store: store.scope(state: \.passwordsCollection, action: \.passwordsCollection)
                 )
-                .navigationTitle(.passwords)
+                .navigationTitle(.localized(.passwords))
+            }
+            .sheet(item: $store.scope(state: \.settings, action: \.settings)) { settingsStore in
+                NavigationStack {
+                    SettingsView(store: settingsStore)
+                }
             }
             .sheet(item: $store.scope(state: \.insertPassword, action: \.insertPassword)) { insertStore in
                 NavigationStack {
                     InsertPasswordView(store: insertStore)
                 }
             }
-            .sheet(item: $store.scope(state: \.passwordDetail, action: \.passwordDetail)) { _ in
-                // Password detail view (you can create this later)
-                Text(.passwordDetails)
+            .sheet(item: $store.scope(state: \.passwordDetail, action: \.passwordDetail)) { detailStore in
+                NavigationStack {
+                    PasswordDetailView(store: detailStore)
+                }
             }
             .onAppear {
                 store.send(.onAppear)

@@ -14,19 +14,40 @@ struct PasswordsNavigator {
     
     @ObservableState
     struct State: Equatable {
-        var passwordsCollection = PasswordsCollection.State(passwords: [])
+        var passwordsCollection: PasswordsCollection.State
+        @Presents var settings: Settings.State?
         @Presents var insertPassword: InsertPassword.State?
-        @Presents var passwordDetail: Password?
+        @Presents var passwordDetail: PasswordDetail.State?
         
-        init() {}
+        init() {
+            // Load saved view preferences
+            let viewModeRaw = UserDefaults.standard.string(forKey: "passwordViewMode") ?? "list"
+            let viewMode = PasswordViewMode(rawValue: viewModeRaw) ?? .list
+            
+            let groupingModeRaw = UserDefaults.standard.string(forKey: "passwordGroupingMode") ?? "all"
+            let groupingMode = PasswordGroupingMode(rawValue: groupingModeRaw) ?? .all
+            
+            self.passwordsCollection = PasswordsCollection.State(
+                passwords: [],
+                viewMode: viewMode,
+                groupingMode: groupingMode
+            )
+        }
     }
     
     enum Action {
         case onAppear
         case passwordsCollection(PasswordsCollection.Action)
+        case settings(PresentationAction<Settings.Action>)
         case insertPassword(PresentationAction<InsertPassword.Action>)
-        case passwordDetail(PresentationAction<Never>)
+        case passwordDetail(PresentationAction<PasswordDetail.Action>)
         case passwordsLoaded([Password])
+        case syncHomeKitRooms
+        
+        enum Delegate {
+            case navigateToHomes
+        }
+        case delegate(Delegate)
     }
     
     init() {}
@@ -40,6 +61,9 @@ struct PasswordsNavigator {
             switch action {
             case .onAppear:
                 return .run { send in
+                    // Sync HomeKit rooms first
+                    await send(.syncHomeKitRooms)
+                    
                     let passwords = await passwordsUsecase.fetchPasswords()
                     await send(.passwordsLoaded(passwords))
                 }
@@ -51,10 +75,18 @@ struct PasswordsNavigator {
             case .passwordsCollection(.navigation(.onAddPassword)):
                 state.insertPassword = InsertPassword.State()
                 return .none
-                
-            case let .passwordsCollection(.navigation(.presentPassword(password))):
-                state.passwordDetail = password
+            case .passwordsCollection(.navigation(.presentSettings)):
+                // Load saved preferences
+                let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme") ?? "system"
+                let theme = AppTheme(rawValue: themeRaw) ?? .system
+                state.settings = Settings.State(selectedTheme: theme)
                 return .none
+            case let .passwordsCollection(.navigation(.presentPassword(password))):
+                state.passwordDetail = PasswordDetail.State(password: password)
+                return .none
+                
+            case .passwordsCollection(.navigation(.navigateToHomes)):
+                return .send(.delegate(.navigateToHomes))
                 
             case .insertPassword(.dismiss):
                 // Reload passwords after dismissing insert sheet
@@ -63,15 +95,68 @@ struct PasswordsNavigator {
                     await send(.passwordsLoaded(passwords))
                 }
                 
-            case .passwordsCollection, .insertPassword, .passwordDetail:
+            case .passwordDetail(.presented(.delegate(.passwordUpdated))):
+                // Reload passwords after updating a password
+                return .run { send in
+                    let passwords = await passwordsUsecase.fetchPasswords()
+                    await send(.passwordsLoaded(passwords))
+                }
+                
+            case .passwordDetail(.dismiss):
+                // Reload passwords after dismissing detail (in case password was updated)
+                return .run { send in
+                    let passwords = await passwordsUsecase.fetchPasswords()
+                    await send(.passwordsLoaded(passwords))
+                }
+                
+            case .settings(.dismiss):
+                // Reload passwords after dismissing settings (in case HomeKit devices were imported)
+                return .run { send in
+                    let passwords = await passwordsUsecase.fetchPasswords()
+                    await send(.passwordsLoaded(passwords))
+                }
+                
+            case .syncHomeKitRooms:
+                @Dependency(\.homeKitService) var homeKitService
+                return .run { send in
+                    do {
+                        // Fetch HomeKit devices
+                        let homeKitDevices = try await homeKitService.fetchDevices()
+                        
+                        // Fetch existing passwords
+                        let passwords = await passwordsUsecase.fetchPasswords()
+                        
+                        // Update rooms for passwords that have HomeKit identifiers
+                        for password in passwords {
+                            guard let homeKitId = password.homeKitUniqueIdentifier else { continue }
+                            
+                            // Find matching HomeKit device
+                            if let homeKitDevice = homeKitDevices.first(where: { $0.uniqueIdentifier == homeKitId }) {
+                                // Update room if it changed
+                                if password.room != homeKitDevice.roomName {
+                                    password.room = homeKitDevice.roomName
+                                    password.updatedAt = Date()
+                                    await passwordsUsecase.updatePassword(password)
+                                }
+                            }
+                        }
+                    } catch {
+                        // Silently fail - not critical if sync fails
+                    }
+                }
+                
+            case .passwordsCollection, .insertPassword, .passwordDetail, .settings, .delegate:
                 return .none
             }
+        }
+        .ifLet(\.$settings, action: \.settings) {
+            Settings()
         }
         .ifLet(\.$insertPassword, action: \.insertPassword) {
             InsertPassword()
         }
         .ifLet(\.$passwordDetail, action: \.passwordDetail) {
-            EmptyReducer()
+            PasswordDetail()
         }
     }
 }

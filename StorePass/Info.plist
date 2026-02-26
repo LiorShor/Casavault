@@ -6,5 +6,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSHomeKitUsageDescription</key>
+	<string>This app needs access to your HomeKit devices to import them and help you manage their passwords securely.</string>
 </dict>
 </plist>

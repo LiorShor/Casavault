@@ -27,6 +27,12 @@ extension HomeNavigator {
                         store: store.scope(state: \.passwords, action: \.passwords)
                     )
                 }
+                
+                Tab(.localized(.homes), systemImage: "house.fill", value: TabType.homes) {
+                    HomesNavigator.ContentView(
+                        store: store.scope(state: \.homes, action: \.homes)
+                    )
+                }
             }
         }
     }

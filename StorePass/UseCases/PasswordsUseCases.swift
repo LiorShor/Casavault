@@ -11,8 +11,10 @@ import SwiftData
 
 struct PasswordsUseCases {
     var fetchPasswords: () async -> [Password]
+    var fetchPasswordsForHome: (UUID) async -> [Password]
     var addPassword: (Password) async -> Void
     var removePassword: (Password) async -> Void
+    var updatePassword: (Password) async -> Void
 }
 
 extension PasswordsUseCases: DependencyKey {
@@ -22,6 +24,16 @@ extension PasswordsUseCases: DependencyKey {
             do { return try db.fetchAll() }
                 catch { return [] }
             },
+        fetchPasswordsForHome: { homeId in
+            @Dependency(\.swiftData) var db
+            do {
+                var descriptor = FetchDescriptor<Password>(sortBy: [SortDescriptor(\.id)])
+                descriptor.predicate = #Predicate { $0.homeId == homeId }
+                return try db.fetch(descriptor)
+            } catch {
+                return []
+            }
+        },
         addPassword: { password in
             @Dependency(\.swiftData) var db
             do { return try db.add(password) }
@@ -36,8 +48,15 @@ extension PasswordsUseCases: DependencyKey {
             } catch {
                 // Handle error if needed
             }
+        },
+        updatePassword: { password in
+            @Dependency(\.swiftData) var db
+            do {
+                try db.update(password)
+            } catch {
+                // Handle error if needed
+            }
         }
-        
     )
     
     static let testValue: PasswordsUseCases = .liveValue

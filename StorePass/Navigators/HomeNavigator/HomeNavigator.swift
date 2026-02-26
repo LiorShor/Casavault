@@ -17,6 +17,7 @@ struct HomeNavigator {
         var selectedTab: TabType = .passwords
         
         var passwords = PasswordsNavigator.State()
+        var homes = HomesNavigator.State()
 //        var search = SearchNavigator.State()
         
         init(selectedTab: TabType = .passwords) {
@@ -27,6 +28,7 @@ struct HomeNavigator {
     enum Action {
         case onTabSelection(TabType)
         case passwords(PasswordsNavigator.Action)
+        case homes(HomesNavigator.Action)
 //        case search(SearchNavigator.Action)
     }
     
@@ -35,6 +37,7 @@ struct HomeNavigator {
     var body: some Reducer<State, Action> {
     
         Scope(state: \.passwords, action: \.passwords, child: PasswordsNavigator.init)
+        Scope(state: \.homes, action: \.homes, child: HomesNavigator.init)
         
 //        Scope(state: \.search, action: \.search, child: SearchNavigator.init)
         
@@ -44,7 +47,11 @@ struct HomeNavigator {
                 state.selectedTab = tab
                 return .none
                 
-            case .passwords/*, .search*/:
+            case .passwords(.delegate(.navigateToHomes)):
+                state.selectedTab = .homes
+                return .none
+                
+            case .passwords, .homes/*, .search*/:
                 return .none
             }
         }
@@ -55,5 +62,6 @@ extension HomeNavigator {
     
     enum TabType {
         case passwords
+        case homes
     }
 }

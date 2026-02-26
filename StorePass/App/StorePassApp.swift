@@ -10,7 +10,16 @@ import ComposableArchitecture
 
 @main
 struct StorePassApp: App {
-//    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @AppStorage("selectedTheme") private var selectedTheme = "system"
+    @AppStorage("selectedLanguage") private var selectedLanguage = "en"
+    
+    private var colorScheme: ColorScheme? {
+        switch selectedTheme {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -20,6 +29,8 @@ struct StorePassApp: App {
                     reducer: RootNavigator.init
                 )
             )
+            .preferredColorScheme(colorScheme)
+            .environment(\.locale, Locale(identifier: selectedLanguage))
         }
     }
 }
