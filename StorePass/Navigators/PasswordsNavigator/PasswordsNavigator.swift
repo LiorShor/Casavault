@@ -90,30 +90,54 @@ struct PasswordsNavigator {
                 
             case .insertPassword(.dismiss):
                 // Reload passwords after dismissing insert sheet
+                let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
-                    let passwords = await passwordsUsecase.fetchPasswords()
-                    await send(.passwordsLoaded(passwords))
+                    if let homeId = currentHomeId {
+                        let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                        await send(.passwordsLoaded(passwords))
+                    } else {
+                        let passwords = await passwordsUsecase.fetchPasswords()
+                        await send(.passwordsLoaded(passwords))
+                    }
                 }
                 
             case .passwordDetail(.presented(.delegate(.passwordUpdated))):
                 // Reload passwords after updating a password
+                let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
-                    let passwords = await passwordsUsecase.fetchPasswords()
-                    await send(.passwordsLoaded(passwords))
+                    if let homeId = currentHomeId {
+                        let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                        await send(.passwordsLoaded(passwords))
+                    } else {
+                        let passwords = await passwordsUsecase.fetchPasswords()
+                        await send(.passwordsLoaded(passwords))
+                    }
                 }
                 
             case .passwordDetail(.dismiss):
                 // Reload passwords after dismissing detail (in case password was updated)
+                let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
-                    let passwords = await passwordsUsecase.fetchPasswords()
-                    await send(.passwordsLoaded(passwords))
+                    if let homeId = currentHomeId {
+                        let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                        await send(.passwordsLoaded(passwords))
+                    } else {
+                        let passwords = await passwordsUsecase.fetchPasswords()
+                        await send(.passwordsLoaded(passwords))
+                    }
                 }
                 
             case .settings(.dismiss):
                 // Reload passwords after dismissing settings (in case HomeKit devices were imported)
+                let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
-                    let passwords = await passwordsUsecase.fetchPasswords()
-                    await send(.passwordsLoaded(passwords))
+                    if let homeId = currentHomeId {
+                        let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                        await send(.passwordsLoaded(passwords))
+                    } else {
+                        let passwords = await passwordsUsecase.fetchPasswords()
+                        await send(.passwordsLoaded(passwords))
+                    }
                 }
                 
             case .syncHomeKitRooms:
