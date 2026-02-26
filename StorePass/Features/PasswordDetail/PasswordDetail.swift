@@ -19,12 +19,17 @@ struct PasswordDetail {
         var isEditing: Bool = false
         var editedName: String
         var editedValue: String
+        var editedRoom: String?
+        var availableRooms: [String] = []
+        var isAddingNewRoom: Bool = false
+        var newRoomName: String = .empty
         var isSaving: Bool = false
         
         init(password: Password) {
             self.password = password
             self.editedName = password.name
             self.editedValue = password.value
+            self.editedRoom = password.room
         }
     }
     
@@ -36,11 +41,18 @@ struct PasswordDetail {
             case onSaveButtonTapped
             case nameChanged(String)
             case valueChanged(String)
+            case roomSelected(String?)
+            case addNewRoomTapped
+            case newRoomNameChanged(String)
+            case clearNewRoomName
+            case saveNewRoom
+            case cancelAddingRoom
         }
         
         @CasePathable
         enum Internal: Equatable {
             case passwordUpdated
+            case roomsLoaded([String])
         }
         
         @CasePathable
@@ -73,12 +85,22 @@ struct PasswordDetail {
         switch action {
         case .onEditButtonTapped:
             state.isEditing = true
-            return .none
+            // Initialize available rooms with current room if it exists
+            if let currentRoom = state.password.room {
+                state.availableRooms = [currentRoom]
+            }
+            // Load available rooms when entering edit mode
+            return .run { send in
+                let passwords = await passwordsUsecase.fetchPasswords()
+                let rooms = Set(passwords.compactMap { $0.room }).sorted()
+                await send(.internal(.roomsLoaded(rooms)))
+            }
             
         case .onCancelButtonTapped:
             state.isEditing = false
             state.editedName = state.password.name
             state.editedValue = state.password.value
+            state.editedRoom = state.password.room
             return .none
             
         case .onSaveButtonTapped:
@@ -89,6 +111,7 @@ struct PasswordDetail {
             state.isSaving = true
             state.password.name = state.editedName
             state.password.value = state.editedValue
+            state.password.room = state.editedRoom
             state.password.updatedAt = Date()
             
             let updatedPassword = state.password
@@ -105,6 +128,44 @@ struct PasswordDetail {
         case let .valueChanged(value):
             state.editedValue = value
             return .none
+            
+        case let .roomSelected(room):
+            state.editedRoom = room
+            return .none
+            
+        case .addNewRoomTapped:
+            state.isAddingNewRoom = true
+            state.newRoomName = .empty
+            return .none
+            
+        case let .newRoomNameChanged(name):
+            state.newRoomName = name
+            return .none
+            
+        case .clearNewRoomName:
+            state.newRoomName = .empty
+            return .none
+            
+        case .saveNewRoom:
+            guard !state.newRoomName.isEmpty else {
+                state.isAddingNewRoom = false
+                return .none
+            }
+            let roomName = state.newRoomName
+            state.editedRoom = roomName
+            state.isAddingNewRoom = false
+            state.newRoomName = .empty
+            // Add to available rooms if not already there
+            if !state.availableRooms.contains(roomName) {
+                state.availableRooms.append(roomName)
+                state.availableRooms.sort()
+            }
+            return .none
+            
+        case .cancelAddingRoom:
+            state.isAddingNewRoom = false
+            state.newRoomName = .empty
+            return .none
         }
     }
     
@@ -117,6 +178,10 @@ struct PasswordDetail {
             return .run { [password = state.password] send in
                 await send(.delegate(.passwordUpdated(password)))
             }
+            
+        case let .roomsLoaded(rooms):
+            state.availableRooms = rooms
+            return .none
         }
     }
 }
