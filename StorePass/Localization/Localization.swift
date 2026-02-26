@@ -81,6 +81,7 @@ public enum Localization {
     case noHomesYetMessage
     case icon
     case selectIcon
+    case appName
 }
 
 public extension String {

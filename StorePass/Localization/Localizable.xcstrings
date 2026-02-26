@@ -91,6 +91,24 @@
         }
       }
     },
+    "appName" : {
+      "comment" : "Application name displayed on splash screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "StorePass"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "StorePass"
+          }
+        }
+      }
+    },
     "cancel" : {
       "comment" : "A button label that cancels an action.",
       "extractionState" : "manual",
@@ -604,6 +622,24 @@
         }
       }
     },
+    "icon" : {
+      "comment" : "Label for icon field",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icon"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אייקון"
+          }
+        }
+      }
+    },
     "importButton" : {
       "comment" : "Button to import selected devices",
       "extractionState" : "manual",
@@ -1089,6 +1125,24 @@
         }
       }
     },
+    "selectIcon" : {
+      "comment" : "Placeholder for icon selection",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Icon"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחר אייקון"
+          }
+        }
+      }
+    },
     "selectRoom" : {
       "comment" : "Picker label for room selection",
       "extractionState" : "manual",
@@ -1208,42 +1262,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "מערכת"
-          }
-        }
-      }
-    },
-    "icon" : {
-      "comment" : "Label for icon field",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Icon"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אייקון"
-          }
-        }
-      }
-    },
-    "selectIcon" : {
-      "comment" : "Placeholder for icon selection",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select Icon"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בחר אייקון"
           }
         }
       }
