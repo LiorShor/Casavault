@@ -56,8 +56,10 @@ struct InsertPasswordView: View {
                                 inputText = store.code
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
+                                    .padding(12)
+                                    .contentShape(Rectangle())
                             }
-                            .padding(.leading, 20)
+                            .padding(.leading, 8)
                         }
                     }
                 
@@ -76,8 +78,10 @@ struct InsertPasswordView: View {
                                 store.send(.onClearDeviceNameButtonTapped)
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
+                                    .padding(12)
+                                    .contentShape(Rectangle())
                             }
-                            .padding(.leading, 20)
+                            .padding(.leading, 8)
                         }
                     }
                 
@@ -120,48 +124,33 @@ struct InsertPasswordView: View {
                 .background(Color.secondary.opacity(0.1))
                 .clipShape(Capsule())
                 
-                // Icon Picker
-                Picker(selection: Binding(
-                    get: { store.selectedIcon ?? "" },
-                    set: { newValue in
-                        if newValue.isEmpty {
-                            store.send(.iconSelected(nil))
-                        } else {
-                            store.send(.iconSelected(newValue))
-                        }
-                    }
-                )) {
+                // Icon Grid
+                VStack(alignment: .leading, spacing: 6) {
                     Text(.localized(.selectIcon))
-                        .tag("")
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
                     
-                    ForEach(store.availableIcons, id: \.self) { icon in
-                        Label {
-                            Text(icon)
-                        } icon: {
-                            Image(systemName: icon)
+                    LazyVGrid(columns: [
+                        GridItem(.adaptive(minimum: 44), spacing: 6)
+                    ], spacing: 6) {
+                        ForEach(store.availableIcons, id: \.self) { icon in
+                            Button {
+                                store.send(.iconSelected(icon))
+                            } label: {
+                                Image(systemName: icon)
+                                    .font(.title)
+                                    .foregroundColor(.blue)
+                                    .frame(width: 44, height: 44)
+                                    .background(
+                                        store.selectedIcon == icon 
+                                            ? Color.secondary.opacity(0.1)
+                                            : Color.clear
+                                    )
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
                         }
-                        .tag(icon)
-                    }
-                } label: {
-                    HStack {
-                        if let selectedIcon = store.selectedIcon {
-                            Image(systemName: selectedIcon)
-                                .foregroundColor(.primary)
-                            Text(selectedIcon)
-                                .foregroundColor(.primary)
-                        } else {
-                            Text(.localized(.selectIcon))
-                                .foregroundColor(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.down")
-                            .foregroundColor(.secondary)
                     }
                 }
-                .pickerStyle(.menu)
-                .padding()
-                .background(Color.secondary.opacity(0.1))
-                .clipShape(Capsule())
                 
                 Spacer()
                 Button {
@@ -223,6 +212,18 @@ struct AddRoomSheet: View {
                     .focused($isTextFieldFocused)
                     .padding(.horizontal, 40)
                     .multilineTextAlignment(.center)
+                    .overlay(alignment: .leading) {
+                        if !store.newRoomName.isEmpty {
+                            Button {
+                                store.send(.clearNewRoomName)
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .padding(12)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 48)
+                        }
+                    }
                 
                 Spacer()
                 

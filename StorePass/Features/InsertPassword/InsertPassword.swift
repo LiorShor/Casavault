@@ -25,7 +25,6 @@ struct InsertPassword {
         var selectedRoom: String?
         var isAddingNewRoom: Bool = false
         var newRoomName: String = .empty
-        var selectedIcon: String? = nil
         
         // Available SF Symbols for devices
         var availableIcons: [String] {
@@ -37,7 +36,7 @@ struct InsertPassword {
                 "speaker.wave.2.fill",
                 "camera.fill",
                 "tv.fill",
-                "outlet.fill",
+                "poweroutlet.type.h.square.fill",
                 "switch.2",
                 "sensor.fill",
                 "window.ceiling.closed",
@@ -45,6 +44,8 @@ struct InsertPassword {
                 "humidifier.fill"
             ]
         }
+        
+        var selectedIcon: String? = "lightbulb.fill"
         
         // HomeKit code validation
         var isValidHomeKitCode: Bool {
@@ -69,6 +70,7 @@ struct InsertPassword {
         case roomsLoaded([String])
         case roomSelected(String?)
         case addNewRoomTapped
+        case clearNewRoomName
         case saveNewRoom
         case cancelAddingRoom
         case iconSelected(String?)
@@ -107,6 +109,10 @@ struct InsertPassword {
                 
             case .addNewRoomTapped:
                 state.isAddingNewRoom = true
+                state.newRoomName = .empty
+                return .none
+                
+            case .clearNewRoomName:
                 state.newRoomName = .empty
                 return .none
                 
