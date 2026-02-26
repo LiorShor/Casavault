@@ -33,10 +33,6 @@ struct PasswordsCollectionView: View {
             store.send(.view(.onAppear))
         }
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                homeSelector
-            }
-            
             ToolbarItem(placement: .topBarLeading) {
                 Button {
                     store.send(.view(.onSettingsButtonTapped))
@@ -46,16 +42,37 @@ struct PasswordsCollectionView: View {
             }
             
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    store.send(.view(.toggleEditMode))
-                } label: {
-                    Text(store.isEditMode ? String.localized(.done) : String.localized(.edit))
-                }
-                .disabled(store.hasNoHome)
-            }
-            
-            ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    // Edit Mode Section
+                    Button {
+                        store.send(.view(.toggleEditMode))
+                    } label: {
+                        Label(
+                            store.isEditMode ? String.localized(.done) : String.localized(.edit),
+                            systemImage: store.isEditMode ? "checkmark" : "pencil.line"
+                        )
+                    }
+                    .disabled(store.hasNoHome)
+                    
+                    Divider()
+                    
+                    // Home Selection Section
+                    if !store.availableHomes.isEmpty {
+                        Picker(selection: Binding(
+                            get: { store.currentHomeId ?? UUID() },
+                            set: { store.send(.view(.homeSelected($0))) }
+                        )) {
+                            ForEach(store.availableHomes) { home in
+                                Text(home.name).tag(home.id)
+                            }
+                        } label: {
+                            Label(.localized(.selectHome), systemImage: "house")
+                        }
+                        
+                        Divider()
+                    }
+                    
+                    // Grouping Section
                     Picker(selection: Binding(
                         get: { store.groupingMode },
                         set: { store.send(.view(.groupingModeChanged($0))) }
@@ -69,6 +86,7 @@ struct PasswordsCollectionView: View {
                     
                     Divider()
                     
+                    // View Mode Section
                     Button {
                         store.send(.view(.toggleViewMode))
                     } label: {
@@ -78,7 +96,7 @@ struct PasswordsCollectionView: View {
                         )
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
                 }
             }
             
@@ -127,7 +145,7 @@ struct PasswordsCollectionView: View {
                 ForEach(store.sortedRoomNames, id: \.self) { roomName in
                     Section {
                         LazyVGrid(columns: [
-                            GridItem(.adaptive(minimum: 150), spacing: 12)
+                            GridItem(.adaptive(minimum: 80), spacing: 12)
                         ], spacing: 12) {
                             ForEach(store.groupedPasswords[roomName] ?? []) { password in
                                 PasswordGridCard(
@@ -293,10 +311,10 @@ struct PasswordGridCard: View {
                         onDelete()
                     } label: {
                         Image(systemName: "minus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.red, Color(UIColor.systemBackground))
+                            .font(.title)
+                            .foregroundStyle(.red, Color(.systemGray5))
                     }
-                    .offset(x: 8, y: -8)
+                    .offset(x: 15, y: -15)
                 }
             }
         }
@@ -324,15 +342,15 @@ struct PasswordGridCard: View {
     }
     
     private func wiggle() async {
-        withAnimation(.easeInOut(duration: 0.15)) {
+        withAnimation(.easeInOut(duration: 0.1)) {
             wiggleAngle = -2
         }
-        try? await Task.sleep(nanoseconds: 150_000_000) // 0.15 seconds
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.15 seconds
         
-        withAnimation(.easeInOut(duration: 0.15)) {
+        withAnimation(.easeInOut(duration: 0.1)) {
             wiggleAngle = 2
         }
-        try? await Task.sleep(nanoseconds: 150_000_000) // 0.15 seconds
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.15 seconds
     }
 }
 
@@ -373,34 +391,6 @@ struct PasswordDropDelegate: DropDelegate {
 }
 
 extension PasswordsCollectionView {
-    @ViewBuilder
-    private var homeSelector: some View {
-        if !store.availableHomes.isEmpty {
-            Menu {
-                ForEach(store.availableHomes) { home in
-                    Button {
-                        store.send(.view(.homeSelected(home.id)))
-                    } label: {
-                        HStack {
-                            Text(home.name)
-                            if home.id == store.currentHomeId {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "house.fill")
-                    Text(store.currentHome?.name ?? String.localized(.selectHome))
-                        .font(.headline)
-                    Image(systemName: "chevron.down")
-                        .font(.caption)
-                }
-            }
-        }
-    }
-    
     @ViewBuilder
     private var noHomeView: some View {
         VStack(spacing: 20) {
