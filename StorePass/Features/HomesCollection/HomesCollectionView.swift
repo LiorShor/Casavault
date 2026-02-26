@@ -159,22 +159,21 @@ struct AddHomeSheet: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 
-                HStack {
-                    TextField(.localized(.homeName), text: $store.newHomeName)
-                        .padding()
-                        .background(Color.secondary.opacity(0.1))
-                        .font(.largeTitle)
-                        .multilineTextAlignment(.center)
-                        .clipShape(Capsule())
-                        .focused($isTextFieldFocused)
-                    
-                    if !store.newHomeName.isEmpty {
-                        Image(systemName: store.homeNameExists ? "xmark.circle.fill" : "checkmark.circle.fill")
-                            .foregroundStyle(store.homeNameExists ? .red : .green)
-                            .imageScale(.large)
+                TextField(.localized(.homeName), text: $store.newHomeName)
+                    .padding()
+                    .background(Color.secondary.opacity(0.1))
+                    .font(.largeTitle)
+                    .multilineTextAlignment(.center)
+                    .clipShape(Capsule())
+                    .focused($isTextFieldFocused)
+                    .overlay(alignment: .trailing) {
+                        if !store.newHomeName.isEmpty {
+                            Image(systemName: store.homeNameExists ? "xmark.circle.fill" : "checkmark.circle.fill")
+                                .foregroundStyle(store.homeNameExists ? .red : .green)
+                                .padding(.trailing, 20)
+                        }
                     }
-                }
-                .padding(.horizontal, 40)
+                    .padding(.horizontal, 40)
                 
                 Spacer()
                 
