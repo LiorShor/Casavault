@@ -48,6 +48,55 @@ struct PasswordDetailView: View {
                 Text(.localized(.password))
             }
             
+            // Room Section
+            Section {
+                if store.isEditing {
+                    Picker(selection: Binding(
+                        get: { store.editedRoom ?? "" },
+                        set: { newValue in
+                            if newValue.isEmpty {
+                                store.send(.view(.roomSelected(nil)))
+                            } else if newValue == "___ADD_NEW___" {
+                                store.send(.view(.addNewRoomTapped))
+                            } else {
+                                store.send(.view(.roomSelected(newValue)))
+                            }
+                        }
+                    )) {
+                        Section {
+                            Text(.localized(.selectRoom))
+                                .tag("")
+                            
+                            ForEach(store.availableRooms, id: \.self) { room in
+                                Text(room).tag(room)
+                            }
+                        }
+                        
+                        Section {
+                            Label(.localized(.addNewRoom), systemImage: "plus.circle")
+                                .tag("___ADD_NEW___")
+                        }
+                    } label: {
+                        Text(.localized(.room))
+                    }
+                    .pickerStyle(.menu)
+                } else {
+                    HStack {
+                        Text(.localized(.room))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if let room = store.password.room {
+                            Text(room)
+                        } else {
+                            Text(.localized(.noRoom))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            } header: {
+                Text(.localized(.room))
+            }
+            
             // Metadata Section
             Section {
                 HStack {
@@ -104,6 +153,82 @@ struct PasswordDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: Binding(
+            get: { store.isAddingNewRoom },
+            set: { if !$0 { store.send(.view(.cancelAddingRoom)) } }
+        )) {
+            AddRoomSheetPasswordDetail(store: store)
+        }
+    }
+}
+
+struct AddRoomSheetPasswordDetail: View {
+    @Bindable var store: StoreOf<PasswordDetail>
+    @FocusState private var isTextFieldFocused: Bool
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                Image(systemName: "door.left.hand.open")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 80, height: 80)
+                    .foregroundStyle(.blue)
+                    .padding(.top, 40)
+                
+                Text(.localized(.addNewRoom))
+                    .font(.title)
+                    .fontWeight(.semibold)
+                
+                TextField(.localized(.roomName), text: Binding(
+                    get: { store.newRoomName },
+                    set: { store.send(.view(.newRoomNameChanged($0))) }
+                ))
+                    .padding()
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(Capsule())
+                    .font(.largeTitle)
+                    .focused($isTextFieldFocused)
+                    .padding(.horizontal, 40)
+                    .multilineTextAlignment(.center)
+                    .overlay(alignment: .leading) {
+                        if !store.newRoomName.isEmpty {
+                            Button {
+                                store.send(.view(.clearNewRoomName))
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .padding(12)
+                                    .contentShape(Rectangle())
+                            }
+                            .padding(.leading, 48)
+                        }
+                    }
+                
+                Spacer()
+                
+                Button {
+                    store.send(.view(.saveNewRoom))
+                } label: {
+                    Text(.localized(.save))
+                        .frame(maxWidth: .infinity, minHeight: 50)
+                }
+                .buttonStyle(.glassProminent)
+                .disabled(store.newRoomName.isEmpty)
+                .padding(.horizontal, 40)
+                .padding(.bottom, 20)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(.localized(.cancel)) {
+                        store.send(.view(.cancelAddingRoom))
+                    }
+                }
+            }
+            .onAppear {
+                isTextFieldFocused = true
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 
