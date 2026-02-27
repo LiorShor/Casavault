@@ -29,10 +29,12 @@ extension HomesCollection {
                                     store.send(.view(.toggleDefaultHome(home)))
                                 }
                             )
-                        }
-                        .onDelete { indexSet in
-                            for index in indexSet {
-                                store.send(.view(.onDeleteHome(store.homes[index])))
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    store.send(.view(.onDeleteHome(home)))
+                                } label: {
+                                    Label(.localized(.delete), systemImage: "trash")
+                                }
                             }
                         }
                     } header: {
@@ -74,7 +76,7 @@ extension HomesCollection {
                 }
                 .navigationTitle(.localized(.homes))
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             store.send(.view(.onSettingsButtonTapped))
                         } label: {
@@ -189,9 +191,11 @@ struct AddHomeSheet: View {
                 .padding(.bottom, 20)
             }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(.localized(.cancel)) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         store.send(.view(.cancelAddingHome))
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                 }
             }
