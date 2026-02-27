@@ -103,6 +103,15 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle(Text(.localized(.settings)))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        store.send(.view(.onDismiss))
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
             .sheet(item: $store.scope(state: \.shareSheet, action: \.shareSheet)) { _ in
                 if let shareSheetState = store.shareSheet {
                     ShareSheet(items: [shareSheetState.fileURL])

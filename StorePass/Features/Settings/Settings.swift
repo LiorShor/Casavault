@@ -47,6 +47,7 @@ enum AppTheme: String, CaseIterable, Equatable {
 @Reducer
 struct Settings {
     @Dependency(\.passwordsUseCases) var passwordsUsecase
+    @Dependency(\.dismiss) var dismiss
     
     @ObservableState
     struct State: Equatable {
@@ -72,6 +73,7 @@ struct Settings {
             case themeChanged(AppTheme)
             case onOpenLanguageSettingsButtonTapped
             case onImportFromHomeKitButtonTapped
+            case onDismiss
         }
         
         @CasePathable
@@ -137,6 +139,11 @@ struct Settings {
         case .onImportFromHomeKitButtonTapped:
             state.homeKitImport = HomeKitImport.State()
             return .none
+            
+        case .onDismiss:
+            return .run { _ in
+                await dismiss()
+            }
         }
     }
     
