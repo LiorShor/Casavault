@@ -21,7 +21,7 @@ struct Database {
         do {
             let url = URL.applicationSupportDirectory.appending(path: "Model.sqlite")
             let config = ModelConfiguration(url: url)
-            let container = try ModelContainer(for: Password.self, Home.self, configurations: config)
+            let container = try ModelContainer(for: Password.self, Home.self, PasswordAttachment.self, configurations: config)
             return ModelContext(container)
         } catch {
             fatalError("Failed to create container")
