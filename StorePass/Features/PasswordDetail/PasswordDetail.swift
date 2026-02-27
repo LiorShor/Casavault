@@ -89,9 +89,14 @@ struct PasswordDetail {
             if let currentRoom = state.password.room {
                 state.availableRooms = [currentRoom]
             }
-            // Load available rooms when entering edit mode
-            return .run { send in
-                let passwords = await passwordsUsecase.fetchPasswords()
+            // Load available rooms only for the current home
+            return .run { [homeId = state.password.homeId] send in
+                let passwords: [Password]
+                if let homeId = homeId {
+                    passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                } else {
+                    passwords = await passwordsUsecase.fetchPasswords()
+                }
                 let rooms = Set(passwords.compactMap { $0.room }).sorted()
                 await send(.internal(.roomsLoaded(rooms)))
             }
