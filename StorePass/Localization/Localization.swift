@@ -83,6 +83,13 @@ public enum Localization {
     case selectIcon
     case appName
     case searchPasswords
+    case notes
+    case noNotes
+    case attachments
+    case addAttachment
+    case noAttachments
+    case takePhoto
+    case chooseFromLibrary
 }
 
 public extension String {

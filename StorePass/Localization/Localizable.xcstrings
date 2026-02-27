@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "actions" : {
       "comment" : "Section header for action buttons",
       "extractionState" : "manual",
@@ -15,6 +18,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "פעולות"
+          }
+        }
+      }
+    },
+    "addAttachment" : {
+      "comment" : "Button to add an attachment",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Attachment"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספת קובץ מצורף"
           }
         }
       }
@@ -109,6 +130,24 @@
         }
       }
     },
+    "attachments" : {
+      "comment" : "Attachments section header",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attachments"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קבצים מצורפים"
+          }
+        }
+      }
+    },
     "cancel" : {
       "comment" : "A button label that cancels an action.",
       "extractionState" : "manual",
@@ -123,6 +162,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ביטול"
+          }
+        }
+      }
+    },
+    "chooseFromLibrary" : {
+      "comment" : "Action to choose photo from library",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose from Library"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחירה מהגלריה"
           }
         }
       }
@@ -837,6 +894,24 @@
         }
       }
     },
+    "noAttachments" : {
+      "comment" : "Placeholder when there are no attachments",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No attachments"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין קבצים מצורפים"
+          }
+        }
+      }
+    },
     "noHomeKitDevices" : {
       "comment" : "Message when no HomeKit devices are found",
       "extractionState" : "manual",
@@ -945,6 +1020,24 @@
         }
       }
     },
+    "noNotes" : {
+      "comment" : "Placeholder when there are no notes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No notes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין הערות"
+          }
+        }
+      }
+    },
     "noRoom" : {
       "comment" : "Label for passwords without a room",
       "extractionState" : "manual",
@@ -959,6 +1052,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ללא חדר"
+          }
+        }
+      }
+    },
+    "notes" : {
+      "comment" : "Notes section header",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הערות"
           }
         }
       }
@@ -1089,6 +1200,24 @@
         }
       }
     },
+    "searchPasswords" : {
+      "comment" : "Search bar placeholder text for passwords",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search passwords"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיפוש סיסמאות"
+          }
+        }
+      }
+    },
     "selectDevicesToImport" : {
       "comment" : "Section header for device selection",
       "extractionState" : "manual",
@@ -1212,6 +1341,24 @@
         }
       }
     },
+    "takePhoto" : {
+      "comment" : "Action to take a photo with camera",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take Photo"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צילום תמונה"
+          }
+        }
+      }
+    },
     "themeDark" : {
       "comment" : "Dark theme option in settings",
       "extractionState" : "manual",
@@ -1262,24 +1409,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "מערכת"
-          }
-        }
-      }
-    },
-    "searchPasswords" : {
-      "comment" : "Search bar placeholder text for passwords",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Search passwords"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "חיפוש סיסמאות"
           }
         }
       }
