@@ -24,6 +24,7 @@ struct PasswordsCollection {
         var groupingMode: PasswordGroupingMode = .all
         var isEditMode: Bool = false
         var draggingPassword: Password?
+        var searchText: String = ""
         
         var currentHome: Home? {
             availableHomes.first(where: { $0.id == currentHomeId })
@@ -33,22 +34,37 @@ struct PasswordsCollection {
             currentHomeId == nil
         }
         
-        init(passwords: [Password] = [], currentHomeId: UUID? = nil, availableHomes: [Home] = [], viewMode: PasswordViewMode = .list, groupingMode: PasswordGroupingMode = .all) {
+        // Filter passwords based on search text
+        var filteredPasswords: [Password] {
+            guard !searchText.isEmpty else {
+                return passwords
+            }
+            
+            return passwords.filter { password in
+                password.name.localizedCaseInsensitiveContains(searchText) ||
+                (password.room?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+        
+        init(passwords: [Password] = [], currentHomeId: UUID? = nil, availableHomes: [Home] = [], viewMode: PasswordViewMode = .list, groupingMode: PasswordGroupingMode = .all, searchText: String = "") {
             self.passwords = passwords
             self.currentHomeId = currentHomeId
             self.availableHomes = availableHomes
             self.viewMode = viewMode
             self.groupingMode = groupingMode
+            self.searchText = searchText
         }
         
         // Computed property to get passwords grouped by room
         var groupedPasswords: [String: [Password]] {
+            let passwordsToGroup = filteredPasswords
+            
             guard groupingMode == .byRoom else {
-                return ["All": passwords]
+                return ["All": passwordsToGroup]
             }
             
             var grouped: [String: [Password]] = [:]
-            for password in passwords {
+            for password in passwordsToGroup {
                 let roomName = password.room ?? String.localized(.noRoom)
                 if grouped[roomName] == nil {
                     grouped[roomName] = []
@@ -84,6 +100,7 @@ struct PasswordsCollection {
             case endDragging
             case onAppear
             case homeSelected(UUID)
+            case searchTextChanged(String)
         }
         
         @CasePathable
@@ -258,6 +275,10 @@ struct PasswordsCollection {
                     send(.itemsLoaded(updatedPasswords))
                 }
             }
+            
+        case let .searchTextChanged(text):
+            state.searchText = text
+            return .none
         }
     }
 }

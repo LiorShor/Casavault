@@ -82,6 +82,7 @@ public enum Localization {
     case icon
     case selectIcon
     case appName
+    case searchPasswords
 }
 
 public extension String {

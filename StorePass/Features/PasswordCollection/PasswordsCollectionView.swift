@@ -29,6 +29,13 @@ struct PasswordsCollectionView: View {
                 gridView
             }
         }
+        .searchable(
+            text: Binding(
+                get: { store.searchText },
+                set: { store.send(.view(.searchTextChanged($0))) }
+            ),
+            prompt: Text(.localized(.searchPasswords))
+        )
         .onAppear {
             store.send(.view(.onAppear))
         }

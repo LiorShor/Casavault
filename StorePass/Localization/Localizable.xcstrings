@@ -1265,6 +1265,24 @@
           }
         }
       }
+    },
+    "searchPasswords" : {
+      "comment" : "Search bar placeholder text for passwords",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search passwords"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיפוש סיסמאות"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
