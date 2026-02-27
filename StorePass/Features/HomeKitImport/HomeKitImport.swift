@@ -83,9 +83,11 @@ struct HomeKitImport {
                     let defaultHome = await homeUseCases.getDefaultHome()
                     await send(.internal(.currentHomeLoaded(defaultHome)))
                     
-                    // Load existing passwords first
-                    let existingPasswords = await passwordsUseCases.fetchPasswords()
-                    await send(.internal(.existingPasswordsLoaded(existingPasswords)))
+                    // Load existing passwords for the current home only
+                    if let currentHomeId = defaultHome?.id {
+                        let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
+                        await send(.internal(.existingPasswordsLoaded(existingPasswords)))
+                    }
                     
                     // Request authorization
                     try await homeKitService.requestAuthorization()
@@ -114,17 +116,17 @@ struct HomeKitImport {
             
         case .importButtonTapped:
             guard !state.selectedDeviceIds.isEmpty else { return .none }
+            guard let currentHomeId = state.currentHomeId else { return .none }
             
             state.isImporting = true
             let selectedDevices = state.devices.filter { state.selectedDeviceIds.contains($0.id) }
-            let currentHomeId = state.currentHomeId
             
             return .run { send in
-                // Fetch existing passwords to check for HomeKit synced devices
-                let existingPasswords = await passwordsUseCases.fetchPasswords()
+                // Fetch existing passwords only for the current home
+                let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
                 
                 for device in selectedDevices {
-                    // Check if this device already exists (by HomeKit unique identifier)
+                    // Check if this device already exists in the current home (by HomeKit unique identifier)
                     if let existingPassword = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier }) {
                         // Update room if changed
                         if existingPassword.room != device.roomName {
@@ -133,7 +135,7 @@ struct HomeKitImport {
                             await passwordsUseCases.updatePassword(existingPassword)
                         }
                     } else {
-                        // Create new password for this device
+                        // Create new password for this device with explicit homeId
                         let password = Password(
                             name: device.name,
                             value: "", // Empty password - user needs to fill it in
