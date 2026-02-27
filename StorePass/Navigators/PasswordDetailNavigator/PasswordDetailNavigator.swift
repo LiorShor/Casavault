@@ -16,9 +16,9 @@ struct PasswordDetailNavigator {
         var passwordDetail: PasswordDetail.State
         
         @Presents var addRoomSheet: AddRoomSheet.State?
-        @Presents var imageSourcePicker: ImageSourcePicker.State?
         @Presents var imageViewer: ImageViewer.State?
         
+        var showingImageSourcePicker: Bool = false
         var pendingImageSourceType: UIImagePickerController.SourceType = .photoLibrary
         var showingImagePicker: Bool = false
         
@@ -30,11 +30,13 @@ struct PasswordDetailNavigator {
     enum Action: Equatable {
         case passwordDetail(PasswordDetail.Action)
         case addRoomSheet(PresentationAction<AddRoomSheet.Action>)
-        case imageSourcePicker(PresentationAction<ImageSourcePicker.Action>)
         case imageViewer(PresentationAction<ImageViewer.Action>)
         
         @CasePathable
         enum View: Equatable {
+            case imageSourcePickerCameraSelected
+            case imageSourcePickerPhotoLibrarySelected
+            case imageSourcePickerCancelled
             case imagePickerDismissed
             case imageSelected(Data)
         }
@@ -70,12 +72,6 @@ struct PasswordDetailNavigator {
             case .addRoomSheet:
                 return .none
                 
-            case let .imageSourcePicker(.presented(.delegate(delegateAction))):
-                return reduceImageSourcePickerDelegate(&state, delegateAction)
-                
-            case .imageSourcePicker:
-                return .none
-                
             case .imageViewer:
                 return .none
                 
@@ -89,9 +85,6 @@ struct PasswordDetailNavigator {
         .ifLet(\.$addRoomSheet, action: \.addRoomSheet) {
             AddRoomSheet()
         }
-        .ifLet(\.$imageSourcePicker, action: \.imageSourcePicker) {
-            ImageSourcePicker()
-        }
         .ifLet(\.$imageViewer, action: \.imageViewer) {
             ImageViewer()
         }
@@ -104,7 +97,17 @@ struct PasswordDetailNavigator {
             return .none
             
         case .addAttachmentTapped:
-            state.imageSourcePicker = ImageSourcePicker.State()
+            state.showingImageSourcePicker = true
+            return .none
+            
+        case .addAttachmentFromCamera:
+            state.pendingImageSourceType = .camera
+            state.showingImagePicker = true
+            return .none
+            
+        case .addAttachmentFromLibrary:
+            state.pendingImageSourceType = .photoLibrary
+            state.showingImagePicker = true
             return .none
             
         case let .viewAttachment(attachment):
@@ -139,17 +142,24 @@ struct PasswordDetailNavigator {
         }
     }
     
-    private func reduceImageSourcePickerDelegate(_ state: inout State, _ action: ImageSourcePicker.Action.Delegate) -> Effect<Action> {
-        switch action {
-        case let .sourceSelected(sourceType):
-            state.pendingImageSourceType = sourceType
-            state.showingImagePicker = true
-            return .none
-        }
-    }
-    
     private func reduceViewAction(_ state: inout State, _ action: Action.View) -> Effect<Action> {
         switch action {
+        case .imageSourcePickerCameraSelected:
+            state.pendingImageSourceType = .camera
+            state.showingImageSourcePicker = false
+            state.showingImagePicker = true
+            return .none
+            
+        case .imageSourcePickerPhotoLibrarySelected:
+            state.pendingImageSourceType = .photoLibrary
+            state.showingImageSourcePicker = false
+            state.showingImagePicker = true
+            return .none
+            
+        case .imageSourcePickerCancelled:
+            state.showingImageSourcePicker = false
+            return .none
+            
         case .imagePickerDismissed:
             state.showingImagePicker = false
             return .none

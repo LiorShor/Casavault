@@ -17,7 +17,7 @@ struct PasswordsNavigator {
         var passwordsCollection: PasswordsCollection.State
         @Presents var settings: Settings.State?
         @Presents var insertPassword: InsertPassword.State?
-        @Presents var passwordDetail: PasswordDetail.State?
+        @Presents var passwordDetailNavigator: PasswordDetailNavigator.State?
         
         init() {
             // Load saved view preferences
@@ -40,7 +40,7 @@ struct PasswordsNavigator {
         case passwordsCollection(PasswordsCollection.Action)
         case settings(PresentationAction<Settings.Action>)
         case insertPassword(PresentationAction<InsertPassword.Action>)
-        case passwordDetail(PresentationAction<PasswordDetail.Action>)
+        case passwordDetailNavigator(PresentationAction<PasswordDetailNavigator.Action>)
         case passwordsLoaded([Password])
         case syncHomeKitRooms
         
@@ -82,7 +82,7 @@ struct PasswordsNavigator {
                 state.settings = Settings.State(selectedTheme: theme)
                 return .none
             case let .passwordsCollection(.navigation(.presentPassword(password))):
-                state.passwordDetail = PasswordDetail.State(password: password)
+                state.passwordDetailNavigator = PasswordDetailNavigator.State(password: password)
                 return .none
                 
             case .passwordsCollection(.navigation(.navigateToHomes)):
@@ -101,7 +101,7 @@ struct PasswordsNavigator {
                     }
                 }
                 
-            case .passwordDetail(.presented(.delegate(.passwordUpdated))):
+            case .passwordDetailNavigator(.presented(.delegate(.passwordUpdated))):
                 // Reload passwords after updating a password
                 let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
@@ -114,7 +114,7 @@ struct PasswordsNavigator {
                     }
                 }
                 
-            case .passwordDetail(.dismiss):
+            case .passwordDetailNavigator(.dismiss):
                 // Reload passwords after dismissing detail (in case password was updated)
                 let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
@@ -169,7 +169,7 @@ struct PasswordsNavigator {
                     }
                 }
                 
-            case .passwordsCollection, .insertPassword, .passwordDetail, .settings, .delegate:
+            case .passwordsCollection, .insertPassword, .passwordDetailNavigator, .settings, .delegate:
                 return .none
             }
         }
@@ -179,8 +179,8 @@ struct PasswordsNavigator {
         .ifLet(\.$insertPassword, action: \.insertPassword) {
             InsertPassword()
         }
-        .ifLet(\.$passwordDetail, action: \.passwordDetail) {
-            PasswordDetail()
+        .ifLet(\.$passwordDetailNavigator, action: \.passwordDetailNavigator) {
+            PasswordDetailNavigator()
         }
     }
 }

@@ -35,10 +35,8 @@ extension PasswordsNavigator {
                     InsertPasswordView(store: insertStore)
                 }
             }
-            .sheet(item: $store.scope(state: \.passwordDetail, action: \.passwordDetail)) { detailStore in
-                NavigationStack {
-                    PasswordDetailView(store: detailStore)
-                }
+            .sheet(item: $store.scope(state: \.passwordDetailNavigator, action: \.passwordDetailNavigator)) { detailNavigatorStore in
+                PasswordDetailNavigatorView(store: detailNavigatorStore)
             }
             .onAppear {
                 store.send(.onAppear)

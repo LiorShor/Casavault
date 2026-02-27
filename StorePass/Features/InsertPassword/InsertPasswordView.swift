@@ -181,12 +181,12 @@ struct InsertPasswordView: View {
             store.send(.onAppear)
         }
         .sheet(isPresented: $store.isAddingNewRoom) {
-            AddRoomSheet(store: store)
+            InsertPasswordAddRoomSheet(store: store)
         }
     }
 }
 
-struct AddRoomSheet: View {
+struct InsertPasswordAddRoomSheet: View {
     @Bindable var store: StoreOf<InsertPassword>
     @FocusState private var isTextFieldFocused: Bool
     

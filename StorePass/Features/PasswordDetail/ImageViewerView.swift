@@ -13,41 +13,49 @@ struct ImageViewerView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                
-                if let imageData = store.attachment.imageData,
-                   let uiImage = UIImage(data: imageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .scaleEffect(store.scale)
-                        .gesture(
-                            MagnificationGesture()
-                                .onChanged { value in
-                                    store.send(.view(.scaleChanged(value)))
-                                }
-                                .onEnded { value in
-                                    store.send(.view(.scaleEnded(value)))
-                                }
-                        )
-                        .onTapGesture(count: 2) {
-                            withAnimation {
-                                store.send(.view(.doubleTapped))
+            imageContent
+                .navigationTitle(store.attachment.fileName)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    closeButton
+                }
+        }
+    }
+    
+    private var imageContent: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            if let imageData = store.attachment.imageData,
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .scaleEffect(store.scale)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                _ = store.send(.view(.scaleChanged(value)))
                             }
+                            .onEnded { value in
+                                _ = store.send(.view(.scaleEnded(value)))
+                            }
+                    )
+                    .onTapGesture(count: 2) {
+                        withAnimation {
+                            _ = store.send(.view(.doubleTapped))
                         }
-                }
-            }
-            .navigationTitle(store.attachment.fileName)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        store.send(.view(.closeTapped))
-                    } label: {
-                        Image(systemName: "xmark")
                     }
-                }
+            }
+        }
+    }
+    
+    private var closeButton: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Button(action: {
+                store.send(.view(.closeTapped))
+            }) {
+                Image(systemName: "xmark")
             }
         }
     }

@@ -33,7 +33,7 @@ struct PasswordDetailView: View {
             // Password Value Section
             Section {
                 if store.isEditing {
-                    SecureField(.localized(.password), text: $store.editedValue.sending(\.view.valueChanged))
+                    TextField(.localized(.password), text: $store.editedValue.sending(\.view.valueChanged))
                         .textFieldStyle(.plain)
                 } else {
                     HStack {
@@ -97,6 +97,86 @@ struct PasswordDetailView: View {
                 Text(.localized(.room))
             }
             
+            // Notes Section
+            Section {
+                if store.isEditing {
+                    TextEditor(text: $store.editedNotes.sending(\.view.notesChanged))
+                        .frame(minHeight: 100)
+                } else {
+                    if let notes = store.password.notes, !notes.isEmpty {
+                        Text(notes)
+                    } else {
+                        Text(.localized(.noNotes))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            } header: {
+                Text(.localized(.notes))
+            }
+            
+            // Attachments Section
+            Section {
+                if let attachments = store.password.attachments, !attachments.isEmpty {
+                    ForEach(attachments) { attachment in
+                        Button {
+                            store.send(.view(.viewAttachment(attachment)))
+                        } label: {
+                            HStack {
+                                if let imageData = attachment.imageData,
+                                   let uiImage = UIImage(data: imageData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                
+                                VStack(alignment: .leading) {
+                                    Text(attachment.fileName)
+                                        .foregroundStyle(.primary)
+                                    Text(attachment.createdAt, style: .date)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
+                            }
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                store.send(.view(.deleteAttachment(attachment)))
+                            } label: {
+                                Label(.localized(.delete), systemImage: "trash")
+                            }
+                        }
+                    }
+                } else {
+                    Text(.localized(.noAttachments))
+                        .foregroundStyle(.tertiary)
+                }
+                
+                if store.isEditing {
+                    Menu {
+                        Button {
+                            store.send(.view(.addAttachmentFromCamera))
+                        } label: {
+                            Label(.localized(.takePhoto), systemImage: "camera")
+                        }
+                        
+                        Button {
+                            store.send(.view(.addAttachmentFromLibrary))
+                        } label: {
+                            Label(.localized(.chooseFromLibrary), systemImage: "photo.on.rectangle")
+                        }
+                    } label: {
+                        Label(.localized(.addAttachment), systemImage: "plus.circle")
+                    }
+                    .compositingGroup()
+                }
+            } header: {
+                Text(.localized(.attachments))
+            }
+            
             // Metadata Section
             Section {
                 HStack {
@@ -122,29 +202,34 @@ struct PasswordDetailView: View {
         }
         .navigationTitle(Text(.passwordDetails))
         .navigationBarTitleDisplayMode(.inline)
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if store.isEditing {
-                    HStack(spacing: 8) {
-                        Button {
-                            store.send(.view(.onCancelButtonTapped))
-                        } label: {
-                            Text(.localized(.cancel))
+            if store.isEditing {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        store.send(.view(.onSaveButtonTapped))
+                    } label: {
+                        if store.isSaving {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "checkmark")
+                                .foregroundStyle(.blue)
                         }
-                        
-                        Button {
-                            store.send(.view(.onSaveButtonTapped))
-                        } label: {
-                            if store.isSaving {
-                                ProgressView()
-                            } else {
-                                Text(.localized(.save))
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .disabled(store.editedName.isEmpty || store.editedValue.isEmpty || store.isSaving)
                     }
-                } else {
+                    .disabled(store.editedName.isEmpty || store.editedValue.isEmpty || store.isSaving)
+                }
+                
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        store.send(.view(.onCancelButtonTapped))
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                }
+            } else {
+                ToolbarItem(placement: .confirmationAction) {
                     Button {
                         store.send(.view(.onEditButtonTapped))
                     } label: {
@@ -153,84 +238,6 @@ struct PasswordDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: Binding(
-            get: { store.isAddingNewRoom },
-            set: { if !$0 { store.send(.view(.cancelAddingRoom)) } }
-        )) {
-            AddRoomSheetPasswordDetail(store: store)
-        }
-    }
-}
-
-struct AddRoomSheetPasswordDetail: View {
-    @Bindable var store: StoreOf<PasswordDetail>
-    @FocusState private var isTextFieldFocused: Bool
-    
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 24) {
-                Image(systemName: "door.left.hand.open")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80)
-                    .foregroundStyle(.blue)
-                    .padding(.top, 40)
-                
-                Text(.localized(.addNewRoom))
-                    .font(.title)
-                    .fontWeight(.semibold)
-                
-                TextField(.localized(.roomName), text: Binding(
-                    get: { store.newRoomName },
-                    set: { store.send(.view(.newRoomNameChanged($0))) }
-                ))
-                    .padding()
-                    .background(Color.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-                    .font(.largeTitle)
-                    .focused($isTextFieldFocused)
-                    .padding(.horizontal, 40)
-                    .multilineTextAlignment(.center)
-                    .overlay(alignment: .leading) {
-                        if !store.newRoomName.isEmpty {
-                            Button {
-                                store.send(.view(.clearNewRoomName))
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .padding(12)
-                                    .contentShape(Rectangle())
-                            }
-                            .padding(.leading, 48)
-                        }
-                    }
-                
-                Spacer()
-                
-                Button {
-                    store.send(.view(.saveNewRoom))
-                } label: {
-                    Text(.localized(.save))
-                        .frame(maxWidth: .infinity, minHeight: 50)
-                }
-                .buttonStyle(.glassProminent)
-                .disabled(store.newRoomName.isEmpty)
-                .padding(.horizontal, 40)
-                .padding(.bottom, 20)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        store.send(.view(.cancelAddingRoom))
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
-                }
-            }
-            .onAppear {
-                isTextFieldFocused = true
-            }
-        }
-        .presentationDetents([.medium])
     }
 }
 

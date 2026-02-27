@@ -7,6 +7,8 @@
 
 import Foundation
 import ComposableArchitecture
+import SwiftUI
+import PhotosUI
 
 @Reducer
 struct PasswordDetail {
@@ -20,9 +22,8 @@ struct PasswordDetail {
         var editedName: String
         var editedValue: String
         var editedRoom: String?
+        var editedNotes: String
         var availableRooms: [String] = []
-        var isAddingNewRoom: Bool = false
-        var newRoomName: String = .empty
         var isSaving: Bool = false
         
         init(password: Password) {
@@ -30,6 +31,7 @@ struct PasswordDetail {
             self.editedName = password.name
             self.editedValue = password.value
             self.editedRoom = password.room
+            self.editedNotes = password.notes ?? ""
         }
     }
     
@@ -42,11 +44,13 @@ struct PasswordDetail {
             case nameChanged(String)
             case valueChanged(String)
             case roomSelected(String?)
+            case notesChanged(String)
             case addNewRoomTapped
-            case newRoomNameChanged(String)
-            case clearNewRoomName
-            case saveNewRoom
-            case cancelAddingRoom
+            case addAttachmentTapped
+            case addAttachmentFromCamera
+            case addAttachmentFromLibrary
+            case deleteAttachment(PasswordAttachment)
+            case viewAttachment(PasswordAttachment)
         }
         
         @CasePathable
@@ -106,6 +110,7 @@ struct PasswordDetail {
             state.editedName = state.password.name
             state.editedValue = state.password.value
             state.editedRoom = state.password.room
+            state.editedNotes = state.password.notes ?? ""
             return .none
             
         case .onSaveButtonTapped:
@@ -117,6 +122,7 @@ struct PasswordDetail {
             state.password.name = state.editedName
             state.password.value = state.editedValue
             state.password.room = state.editedRoom
+            state.password.notes = state.editedNotes.isEmpty ? nil : state.editedNotes
             state.password.updatedAt = Date()
             
             let updatedPassword = state.password
@@ -138,38 +144,32 @@ struct PasswordDetail {
             state.editedRoom = room
             return .none
             
+        case let .notesChanged(notes):
+            state.editedNotes = notes
+            return .none
+            
+        case .addAttachmentTapped:
+            // Handled by navigator
+            return .none
+            
+        case .addAttachmentFromCamera:
+            // Handled by navigator
+            return .none
+            
+        case .addAttachmentFromLibrary:
+            // Handled by navigator
+            return .none
+            
+        case let .deleteAttachment(attachment):
+            state.password.attachments?.removeAll(where: { $0.id == attachment.id })
+            return .none
+            
+        case .viewAttachment:
+            // Handled by navigator
+            return .none
+            
         case .addNewRoomTapped:
-            state.isAddingNewRoom = true
-            state.newRoomName = .empty
-            return .none
-            
-        case let .newRoomNameChanged(name):
-            state.newRoomName = name
-            return .none
-            
-        case .clearNewRoomName:
-            state.newRoomName = .empty
-            return .none
-            
-        case .saveNewRoom:
-            guard !state.newRoomName.isEmpty else {
-                state.isAddingNewRoom = false
-                return .none
-            }
-            let roomName = state.newRoomName
-            state.editedRoom = roomName
-            state.isAddingNewRoom = false
-            state.newRoomName = .empty
-            // Add to available rooms if not already there
-            if !state.availableRooms.contains(roomName) {
-                state.availableRooms.append(roomName)
-                state.availableRooms.sort()
-            }
-            return .none
-            
-        case .cancelAddingRoom:
-            state.isAddingNewRoom = false
-            state.newRoomName = .empty
+            // Handled by navigator
             return .none
         }
     }
