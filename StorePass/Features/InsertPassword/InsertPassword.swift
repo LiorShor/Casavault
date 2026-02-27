@@ -85,10 +85,12 @@ struct InsertPassword {
                     let defaultHome = await homeUseCases.getDefaultHome()
                     await send(.currentHomeLoaded(defaultHome))
                     
-                    // Load existing rooms
-                    let passwords = await passwords.fetchPasswords()
-                    let rooms = Set(passwords.compactMap { $0.room }).sorted()
-                    await send(.roomsLoaded(rooms))
+                    // Load existing rooms only for the current home
+                    if let currentHomeId = defaultHome?.id {
+                        let passwords = await passwords.fetchPasswordsForHome(currentHomeId)
+                        let rooms = Set(passwords.compactMap { $0.room }).sorted()
+                        await send(.roomsLoaded(rooms))
+                    }
                 }
                 
             case let .currentHomeLoaded(home):
