@@ -165,7 +165,7 @@ struct InsertPasswordView: View {
             }
             .padding(.horizontal, 25)
             .toolbar {
-                ToolbarItem {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         store.send(.onCancelButtonTapped)
                     } label: {
@@ -239,9 +239,11 @@ struct AddRoomSheet: View {
                 .padding(.bottom, 20)
             }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(.localized(.cancel)) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         store.send(.cancelAddingRoom)
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                 }
             }

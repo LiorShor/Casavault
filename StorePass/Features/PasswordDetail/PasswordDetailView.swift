@@ -218,9 +218,11 @@ struct AddRoomSheetPasswordDetail: View {
                 .padding(.bottom, 20)
             }
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(.localized(.cancel)) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         store.send(.view(.cancelAddingRoom))
+                    } label: {
+                        Image(systemName: "xmark")
                     }
                 }
             }

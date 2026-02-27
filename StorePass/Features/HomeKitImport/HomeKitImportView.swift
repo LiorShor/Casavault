@@ -25,15 +25,15 @@ struct HomeKitImportView: View {
             .navigationTitle(Text(.localized(.homeKitImport)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         store.send(.view(.cancelButtonTapped))
                     } label: {
-                        Text(.localized(.cancel))
+                        Image(systemName: "xmark")
                     }
                 }
                 
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button {
                         store.send(.view(.importButtonTapped))
                     } label: {
