@@ -24,6 +24,9 @@ extension PasswordsNavigator {
                     store: store.scope(state: \.passwordsCollection, action: \.passwordsCollection)
                 )
                 .navigationTitle(.localized(.passwords))
+                .navigationDestination(item: $store.scope(state: \.passwordDetailNavigator, action: \.passwordDetailNavigator)) { detailNavigatorStore in
+                    PasswordDetailNavigatorView(store: detailNavigatorStore)
+                }
             }
             .sheet(item: $store.scope(state: \.settings, action: \.settings)) { settingsStore in
                 NavigationStack {
@@ -34,9 +37,6 @@ extension PasswordsNavigator {
                 NavigationStack {
                     InsertPasswordView(store: insertStore)
                 }
-            }
-            .sheet(item: $store.scope(state: \.passwordDetailNavigator, action: \.passwordDetailNavigator)) { detailNavigatorStore in
-                PasswordDetailNavigatorView(store: detailNavigatorStore)
             }
             .onAppear {
                 store.send(.onAppear)
