@@ -101,6 +101,23 @@ struct SettingsView: View {
                 } header: {
                     Text(.localized(.data))
                 }
+                
+                // Support Section
+                Section {
+                    Button {
+                        store.send(.view(.onRateAppButtonTapped))
+                    } label: {
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                                .frame(width: 24)
+                            Text(.localized(.rateApp))
+                                .foregroundStyle(.primary)
+                        }
+                    }
+                } header: {
+                    Text(.localized(.support))
+                }
             }
             .navigationTitle(Text(.localized(.settings)))
             .toolbar {

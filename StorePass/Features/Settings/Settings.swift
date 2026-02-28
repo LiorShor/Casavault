@@ -9,6 +9,7 @@ import Foundation
 import ComposableArchitecture
 import SwiftUI
 import Localization
+import StoreKit
 
 enum AppLanguage: String, CaseIterable, Equatable {
     case english = "en"
@@ -73,6 +74,7 @@ struct Settings {
             case themeChanged(AppTheme)
             case onOpenLanguageSettingsButtonTapped
             case onImportFromHomeKitButtonTapped
+            case onRateAppButtonTapped
             case onDismiss
         }
         
@@ -138,6 +140,12 @@ struct Settings {
             
         case .onImportFromHomeKitButtonTapped:
             state.homeKitImport = HomeKitImport.State()
+            return .none
+            
+        case .onRateAppButtonTapped:
+            if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
+                AppStore.requestReview(in: scene)
+            }
             return .none
             
         case .onDismiss:
