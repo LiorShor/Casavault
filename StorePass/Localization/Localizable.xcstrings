@@ -288,6 +288,24 @@
         }
       }
     },
+    "deleteDevice" : {
+      "comment" : "Button to delete a device",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Device"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחיקת מכשיר"
+          }
+        }
+      }
+    },
     "device" : {
       "comment" : "The header for the \"Device\" section of the password detail view.",
       "extractionState" : "manual",
@@ -768,6 +786,42 @@
         }
       }
     },
+    "rateApp" : {
+      "comment" : "Button to rate the app in the store",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate StorePass"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דרג את StorePass"
+          }
+        }
+      }
+    },
+    "support" : {
+      "comment" : "Section header for support options",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Support"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תמיכה"
+          }
+        }
+      }
+    },
     "languageEnglish" : {
       "comment" : "English language display name",
       "extractionState" : "manual",
@@ -1100,13 +1154,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Password details"
+            "value" : "Device details"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "פרטי סיסמה"
+            "value" : "פרטי מכשיר"
           }
         }
       }
