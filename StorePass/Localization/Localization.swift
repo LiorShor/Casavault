@@ -90,6 +90,9 @@ public enum Localization {
     case noAttachments
     case takePhoto
     case chooseFromLibrary
+    case rateApp
+    case support
+    case deleteDevice
 }
 
 public extension String {

@@ -9,6 +9,7 @@ import Foundation
 import ComposableArchitecture
 import SwiftUI
 import PhotosUI
+import UIKit
 
 @Reducer
 struct PasswordDetail {
@@ -26,6 +27,13 @@ struct PasswordDetail {
         var availableRooms: [String] = []
         var isSaving: Bool = false
         
+        @Presents var addRoomSheet: AddRoomSheet.State?
+        @Presents var imageViewer: ImageViewer.State?
+        
+        var showingImageSourcePicker: Bool = false
+        var pendingImageSourceType: UIImagePickerController.SourceType = .photoLibrary
+        var showingImagePicker: Bool = false
+        
         init(password: Password) {
             self.password = password
             self.editedName = password.name
@@ -41,6 +49,7 @@ struct PasswordDetail {
             case onEditButtonTapped
             case onCancelButtonTapped
             case onSaveButtonTapped
+            case onDeleteButtonTapped
             case nameChanged(String)
             case valueChanged(String)
             case roomSelected(String?)
@@ -51,6 +60,11 @@ struct PasswordDetail {
             case addAttachmentFromLibrary
             case deleteAttachment(PasswordAttachment)
             case viewAttachment(PasswordAttachment)
+            case imageSourcePickerCameraSelected
+            case imageSourcePickerPhotoLibrarySelected
+            case imageSourcePickerCancelled
+            case imagePickerDismissed
+            case imageSelected(Data)
         }
         
         @CasePathable
@@ -67,6 +81,8 @@ struct PasswordDetail {
         case view(View)
         case `internal`(Internal)
         case delegate(Delegate)
+        case addRoomSheet(PresentationAction<AddRoomSheet.Action>)
+        case imageViewer(PresentationAction<ImageViewer.Action>)
     }
     
     var body: some Reducer<State, Action> {
@@ -78,9 +94,18 @@ struct PasswordDetail {
             case let .internal(internalAction):
                 return reduceInternalAction(&state, internalAction)
                 
-            case .delegate:
+            case let .addRoomSheet(.presented(.delegate(delegateAction))):
+                return reduceAddRoomSheetDelegate(&state, delegateAction)
+                
+            case .addRoomSheet, .imageViewer, .delegate:
                 return .none
             }
+        }
+        .ifLet(\.$addRoomSheet, action: \.addRoomSheet) {
+            AddRoomSheet()
+        }
+        .ifLet(\.$imageViewer, action: \.imageViewer) {
+            ImageViewer()
         }
     }
     
@@ -132,6 +157,13 @@ struct PasswordDetail {
                 await send(.internal(.passwordUpdated))
             }
             
+        case .onDeleteButtonTapped:
+            let passwordToDelete = state.password
+            return .run { send in
+                await passwordsUsecase.removePassword(passwordToDelete)
+                await dismiss()
+            }
+            
         case let .nameChanged(name):
             state.editedName = name
             return .none
@@ -149,27 +181,56 @@ struct PasswordDetail {
             return .none
             
         case .addAttachmentTapped:
-            // Handled by navigator
+            state.showingImageSourcePicker = true
             return .none
             
         case .addAttachmentFromCamera:
-            // Handled by navigator
+            state.pendingImageSourceType = .camera
+            state.showingImagePicker = true
             return .none
             
         case .addAttachmentFromLibrary:
-            // Handled by navigator
+            state.pendingImageSourceType = .photoLibrary
+            state.showingImagePicker = true
             return .none
             
         case let .deleteAttachment(attachment):
             state.password.attachments?.removeAll(where: { $0.id == attachment.id })
             return .none
             
-        case .viewAttachment:
-            // Handled by navigator
+        case let .viewAttachment(attachment):
+            state.imageViewer = ImageViewer.State(attachment: attachment)
             return .none
             
         case .addNewRoomTapped:
-            // Handled by navigator
+            state.addRoomSheet = AddRoomSheet.State()
+            return .none
+            
+        case .imageSourcePickerCameraSelected:
+            state.pendingImageSourceType = .camera
+            state.showingImageSourcePicker = false
+            state.showingImagePicker = true
+            return .none
+            
+        case .imageSourcePickerPhotoLibrarySelected:
+            state.pendingImageSourceType = .photoLibrary
+            state.showingImageSourcePicker = false
+            state.showingImagePicker = true
+            return .none
+            
+        case .imageSourcePickerCancelled:
+            state.showingImageSourcePicker = false
+            return .none
+            
+        case .imagePickerDismissed:
+            state.showingImagePicker = false
+            return .none
+            
+        case let .imageSelected(imageData):
+            let attachment = PasswordAttachment(imageData: imageData)
+            attachment.password = state.password
+            state.password.attachments?.append(attachment)
+            state.showingImagePicker = false
             return .none
         }
     }
@@ -186,6 +247,20 @@ struct PasswordDetail {
             
         case let .roomsLoaded(rooms):
             state.availableRooms = rooms
+            return .none
+        }
+    }
+    
+    private func reduceAddRoomSheetDelegate(_ state: inout State, _ action: AddRoomSheet.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case let .roomSaved(roomName):
+            // Update the password detail with the new room
+            state.editedRoom = roomName
+            // Add to available rooms if not already there
+            if !state.availableRooms.contains(roomName) {
+                state.availableRooms.append(roomName)
+                state.availableRooms.sort()
+            }
             return .none
         }
     }

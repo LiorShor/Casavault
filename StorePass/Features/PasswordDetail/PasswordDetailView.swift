@@ -13,8 +13,31 @@ struct PasswordDetailView: View {
     
     var body: some View {
         List {
-            // Password Name Section
-            Section {
+            Group {
+                deviceNameSection
+                passwordSection
+                roomSection
+            }
+            
+            Group {
+                notesSection
+                attachmentsSection
+                metadataSection
+            }
+            
+            deleteSection
+        }
+        .navigationTitle(Text(.localized(.passwordDetails)))
+        .navigationBarTitleDisplayMode(.inline)
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+        .toolbar { toolbarContent }
+    }
+    
+    @ViewBuilder
+    private var deviceNameSection: some View {
+        Section {
                 if store.isEditing {
                     TextField(.localized(.deviceName), text: $store.editedName.sending(\.view.nameChanged))
                         .textFieldStyle(.plain)
@@ -29,9 +52,11 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.device))
             }
-            
-            // Password Value Section
-            Section {
+    }
+    
+    @ViewBuilder
+    private var passwordSection: some View {
+        Section {
                 if store.isEditing {
                     TextField(.localized(.password), text: $store.editedValue.sending(\.view.valueChanged))
                         .textFieldStyle(.plain)
@@ -47,9 +72,11 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.password))
             }
-            
-            // Room Section
-            Section {
+    }
+    
+    @ViewBuilder
+    private var roomSection: some View {
+        Section {
                 if store.isEditing {
                     Picker(selection: Binding(
                         get: { store.editedRoom ?? "" },
@@ -96,9 +123,11 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.room))
             }
-            
-            // Notes Section
-            Section {
+    }
+    
+    @ViewBuilder
+    private var notesSection: some View {
+        Section {
                 if store.isEditing {
                     TextEditor(text: $store.editedNotes.sending(\.view.notesChanged))
                         .frame(minHeight: 100)
@@ -113,9 +142,11 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.notes))
             }
-            
-            // Attachments Section
-            Section {
+    }
+    
+    @ViewBuilder
+    private var attachmentsSection: some View {
+        Section {
                 if let attachments = store.password.attachments, !attachments.isEmpty {
                     ForEach(attachments) { attachment in
                         Button {
@@ -176,9 +207,11 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.attachments))
             }
-            
-            // Metadata Section
-            Section {
+    }
+    
+    @ViewBuilder
+    private var metadataSection: some View {
+        Section {
                 HStack {
                     Text(.localized(.created))
                         .foregroundStyle(.secondary)
@@ -199,45 +232,58 @@ struct PasswordDetailView: View {
             } header: {
                 Text(.localized(.information))
             }
-        }
-        .navigationTitle(Text(.passwordDetails))
-        .navigationBarTitleDisplayMode(.inline)
-        .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        }
-        .toolbar {
-            if store.isEditing {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        store.send(.view(.onSaveButtonTapped))
-                    } label: {
-                        if store.isSaving {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.blue)
-                        }
-                    }
-                    .disabled(store.editedName.isEmpty || store.editedValue.isEmpty || store.isSaving)
-                }
-                
-                ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        store.send(.view(.onCancelButtonTapped))
-                    } label: {
-                        Image(systemName: "xmark")
+    }
+    
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        if store.isEditing {
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    store.send(.view(.onSaveButtonTapped))
+                } label: {
+                    if store.isSaving {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(.blue)
                     }
                 }
-            } else {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        store.send(.view(.onEditButtonTapped))
-                    } label: {
-                        Text(.localized(.edit))
-                    }
+                .disabled(store.editedName.isEmpty || store.editedValue.isEmpty || store.isSaving)
+            }
+            
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    store.send(.view(.onCancelButtonTapped))
+                } label: {
+                    Image(systemName: "xmark")
+                }
+            }
+        } else {
+            ToolbarItem(placement: .confirmationAction) {
+                Button {
+                    store.send(.view(.onEditButtonTapped))
+                } label: {
+                    Text(.localized(.edit))
                 }
             }
         }
+    }
+    
+    @ViewBuilder
+    private var deleteSection: some View {
+        Section {
+            Button(role: .destructive) {
+                store.send(.view(.onDeleteButtonTapped))
+            } label: {
+                Text(String.localized(.deleteDevice))
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 16, trailing: 16))
+        }
+        .listRowBackground(Color.clear)
     }
 }
 
