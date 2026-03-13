@@ -18,6 +18,8 @@ struct PasswordsNavigator {
         @Presents var settings: Settings.State?
         @Presents var insertPassword: InsertPassword.State?
         @Presents var passwordDetailNavigator: PasswordDetailNavigator.State?
+        @Presents var homeKitImport: HomeKitImport.State?
+        var showingQRScannerForInsert: Bool = false
         
         init() {
             // Load saved view preferences
@@ -41,8 +43,11 @@ struct PasswordsNavigator {
         case settings(PresentationAction<Settings.Action>)
         case insertPassword(PresentationAction<InsertPassword.Action>)
         case passwordDetailNavigator(PresentationAction<PasswordDetailNavigator.Action>)
+        case homeKitImport(PresentationAction<HomeKitImport.Action>)
         case passwordsLoaded([Password])
         case syncHomeKitRooms
+        case qrScannerForInsertDismissed
+        case qrCodeScannedForInsert(String)
         
         enum Delegate {
             case navigateToHomes
@@ -75,6 +80,22 @@ struct PasswordsNavigator {
             case .passwordsCollection(.navigation(.onAddPassword)):
                 state.insertPassword = InsertPassword.State()
                 return .none
+                
+            case .passwordsCollection(.navigation(.onImportFromHomeKit)):
+                state.homeKitImport = HomeKitImport.State()
+                return .none
+                
+            case .insertPassword(.presented(.scanQRCode)):
+                state.showingQRScannerForInsert = true
+                return .none
+                
+            case .qrScannerForInsertDismissed:
+                state.showingQRScannerForInsert = false
+                return .none
+                
+            case let .qrCodeScannedForInsert(payload):
+                state.showingQRScannerForInsert = false
+                return .send(.insertPassword(.presented(.qrCodeScanned(payload))))
             case .passwordsCollection(.navigation(.presentSettings)):
                 // Load saved preferences
                 let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme") ?? "system"
@@ -128,7 +149,11 @@ struct PasswordsNavigator {
                 }
                 
             case .settings(.dismiss):
-                // Reload passwords after dismissing settings (in case HomeKit devices were imported)
+                // No need to reload - HomeKit import moved to plus button
+                return .none
+                
+            case .homeKitImport(.dismiss):
+                // Reload passwords after dismissing HomeKit import
                 let currentHomeId = state.passwordsCollection.currentHomeId
                 return .run { send in
                     if let homeId = currentHomeId {
@@ -169,7 +194,7 @@ struct PasswordsNavigator {
                     }
                 }
                 
-            case .passwordsCollection, .insertPassword, .passwordDetailNavigator, .settings, .delegate:
+            case .passwordsCollection, .insertPassword, .passwordDetailNavigator, .settings, .homeKitImport, .delegate:
                 return .none
             }
         }
@@ -181,6 +206,9 @@ struct PasswordsNavigator {
         }
         .ifLet(\.$passwordDetailNavigator, action: \.passwordDetailNavigator) {
             PasswordDetailNavigator()
+        }
+        .ifLet(\.$homeKitImport, action: \.homeKitImport) {
+            HomeKitImport()
         }
     }
 }

@@ -47,14 +47,16 @@ struct InsertPassword {
         
         var selectedIcon: String? = "lightbulb.fill"
         
-        // HomeKit code validation
-        var isValidHomeKitCode: Bool {
-            let homeKitCodeRegex = /^\d{3}-\d{2}-\d{3}$/
-            return code.wholeMatch(of: homeKitCodeRegex) != nil
+        // HomeKit/Matter code validation
+        var isValidCode: Bool {
+            let homeKitCodeRegex = /^\d{3}-\d{2}-\d{3}$/  // XXX-XX-XXX (8 digits)
+            let matterCodeRegex = /^\d{4}-\d{3}-\d{4}$/   // XXXX-XXX-XXXX (11 digits)
+            return code.wholeMatch(of: homeKitCodeRegex) != nil || 
+                   code.wholeMatch(of: matterCodeRegex) != nil
         }
         
         var canContinue: Bool {
-            isValidHomeKitCode && !deviceName.isEmpty
+            isValidCode && !deviceName.isEmpty
         }
     }
     
@@ -74,6 +76,8 @@ struct InsertPassword {
         case saveNewRoom
         case cancelAddingRoom
         case iconSelected(String?)
+        case scanQRCode
+        case qrCodeScanned(String)
     }
     
     var body: some Reducer<State, Action> {
@@ -140,14 +144,26 @@ struct InsertPassword {
                 return .none
                 
             case let .onInputChange(text):
-                // Auto-format HomeKit code when user types (XXX-XX-XXX format, max 10 chars)
+                // Auto-format HomeKit/Matter code when user types
+                // HomeKit: XXX-XX-XXX (8 digits, max 10 chars with dashes)
+                // Matter: XXXX-XXX-XXXX (11 digits, max 13 chars with dashes)
                 let digits = text.filter { $0.isNumber }
-                let limitedDigits = String(digits.prefix(10))
+                let limitedDigits = String(digits.prefix(11)) // Support up to 11 digits for Matter
                 
                 var formatted: String = .empty
                 for (index, digit) in limitedDigits.enumerated() {
-                    if index == 3 || index == 5 {
-                        formatted += "-"
+                    // HomeKit format: 3-2-3
+                    // Matter format: 4-3-4
+                    if limitedDigits.count <= 8 {
+                        // HomeKit format
+                        if index == 3 || index == 5 {
+                            formatted += "-"
+                        }
+                    } else {
+                        // Matter format
+                        if index == 4 || index == 7 {
+                            formatted += "-"
+                        }
                     }
                     formatted.append(digit)
                 }
@@ -165,10 +181,19 @@ struct InsertPassword {
                 let room = state.selectedRoom
                 let icon = state.selectedIcon
                 return .run { send in
-                    let password = Password(name: deviceName, value: code, room: room, icon: icon, homeId: homeId, createdAt: Date(), updatedAt: nil)
+                    let password = Password(name: deviceName, value: code, room: room, icon: icon, homeId: homeId, homeKitUniqueIdentifier: nil, notes: nil, createdAt: Date(), updatedAt: nil)
                     await passwords.addPassword(password)
                     await dismiss()
                 }
+                
+            case .scanQRCode:
+                // This will be handled by the navigator
+                return .none
+                
+            case let .qrCodeScanned(payload):
+                // Store the scanned QR code as the password value
+                state.code = payload
+                return .none
             case .onClearCodeButtonTapped:
                 state.code = .empty
                 return .none

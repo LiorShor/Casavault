@@ -51,5 +51,39 @@ struct PasswordDetailNavigatorView: View {
             .sheet(item: $store.scope(state: \.imageViewer, action: \.imageViewer)) { imageViewerStore in
                 ImageViewerView(store: imageViewerStore)
             }
+            .sheet(isPresented: Binding(
+                get: { store.showingQRScanner },
+                set: { if !$0 { store.send(.view(.qrScannerDismissed)) } }
+            )) {
+                QRScannerSheet { payload in
+                    store.send(.view(.qrCodeScanned(payload)))
+                }
+            }
+    }
+}
+
+struct QRScannerSheet: View {
+    let onCodeScanned: (String) -> Void
+    @State private var scannedCode: String?
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            QRCodeScannerView(scannedCode: $scannedCode)
+                .navigationTitle("Scan QR Code")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                    }
+                }
+                .onChange(of: scannedCode) { _, newValue in
+                    if let payload = newValue {
+                        onCodeScanned(payload)
+                    }
+                }
+        }
     }
 }

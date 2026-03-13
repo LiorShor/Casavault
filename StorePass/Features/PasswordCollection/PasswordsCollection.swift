@@ -90,6 +90,7 @@ struct PasswordsCollection {
             case onPasswordTap(Password)
             case onDeletePassword(Password)
             case onAddPasswordButtonTapped
+            case onImportFromHomeKitButtonTapped
             case onSettingsButtonTapped
             case toggleViewMode
             case groupingModeChanged(PasswordGroupingMode)
@@ -107,6 +108,7 @@ struct PasswordsCollection {
         enum Navigation: Equatable {
             case presentPassword(Password)
             case onAddPassword
+            case onImportFromHomeKit
             case presentSettings
             case navigateToHomes
         }
@@ -177,6 +179,9 @@ struct PasswordsCollection {
             
         case .onAddPasswordButtonTapped:
             return .send(.navigation(.onAddPassword))
+            
+        case .onImportFromHomeKitButtonTapped:
+            return .send(.navigation(.onImportFromHomeKit))
             
         case let .onDeletePassword(password):
             return .run { @MainActor [password, currentHomeId = state.currentHomeId] send in

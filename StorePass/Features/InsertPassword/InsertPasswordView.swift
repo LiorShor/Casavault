@@ -44,8 +44,8 @@ struct InsertPasswordView: View {
                     .focused($isFocused)
                     .overlay(alignment: .trailing) {
                         if !store.code.isEmpty {
-                            Image(systemName: store.isValidHomeKitCode ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
-                                .foregroundStyle(store.isValidHomeKitCode ? .green : .red)
+                            Image(systemName: store.isValidCode ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                                .foregroundStyle(store.isValidCode ? .green : .red)
                                 .padding(.trailing, 20)
                         }
                     }
@@ -62,6 +62,16 @@ struct InsertPasswordView: View {
                             .padding(.leading, 8)
                         }
                     }
+                
+                // QR Code Scanner Button
+                Button {
+                    store.send(.scanQRCode)
+                } label: {
+                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .padding(.vertical, 8)
                 
                 Text(.localized(.enterDeviceTitle))
                 TextField(.localized(.deviceNamePlaceholder), text: $store.deviceName)

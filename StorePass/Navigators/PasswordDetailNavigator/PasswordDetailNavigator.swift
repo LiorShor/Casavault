@@ -21,6 +21,7 @@ struct PasswordDetailNavigator {
         var showingImageSourcePicker: Bool = false
         var pendingImageSourceType: UIImagePickerController.SourceType = .photoLibrary
         var showingImagePicker: Bool = false
+        var showingQRScanner: Bool = false
         
         init(password: Password) {
             self.passwordDetail = PasswordDetail.State(password: password)
@@ -39,6 +40,8 @@ struct PasswordDetailNavigator {
             case imageSourcePickerCancelled
             case imagePickerDismissed
             case imageSelected(Data)
+            case qrScannerDismissed
+            case qrCodeScanned(String)
         }
         
         @CasePathable
@@ -114,6 +117,10 @@ struct PasswordDetailNavigator {
             state.imageViewer = ImageViewer.State(attachment: attachment)
             return .none
             
+        case .scanQRCode:
+            state.showingQRScanner = true
+            return .none
+            
         default:
             return .none
         }
@@ -169,6 +176,16 @@ struct PasswordDetailNavigator {
             attachment.password = state.passwordDetail.password
             state.passwordDetail.password.attachments?.append(attachment)
             state.showingImagePicker = false
+            return .none
+            
+        case .qrScannerDismissed:
+            state.showingQRScanner = false
+            return .none
+            
+        case let .qrCodeScanned(payload):
+            // Store the scanned QR code as the password value
+            state.passwordDetail.password.value = payload
+            state.showingQRScanner = false
             return .none
         }
     }

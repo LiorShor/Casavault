@@ -55,7 +55,6 @@ struct Settings {
         var selectedTheme: AppTheme
         var isExportingPasswords: Bool = false
         @Presents var shareSheet: ShareSheetState?
-        @Presents var homeKitImport: HomeKitImport.State?
         
         init(selectedTheme: AppTheme = .system) {
             self.selectedTheme = selectedTheme
@@ -73,7 +72,6 @@ struct Settings {
             case onExportButtonTapped
             case themeChanged(AppTheme)
             case onOpenLanguageSettingsButtonTapped
-            case onImportFromHomeKitButtonTapped
             case onRateAppButtonTapped
             case onDismiss
         }
@@ -91,7 +89,6 @@ struct Settings {
         case `internal`(Internal)
         case navigation(Navigation)
         case shareSheet(PresentationAction<Never>)
-        case homeKitImport(PresentationAction<HomeKitImport.Action>)
     }
     
     var body: some Reducer<State, Action> {
@@ -103,15 +100,12 @@ struct Settings {
             case let .internal(internalAction):
                 return reduceInternalAction(&state, internalAction)
                 
-            case .navigation, .shareSheet, .homeKitImport:
+            case .navigation, .shareSheet:
                 return .none
             }
         }
         .ifLet(\.$shareSheet, action: \.shareSheet) {
             EmptyReducer()
-        }
-        .ifLet(\.$homeKitImport, action: \.homeKitImport) {
-            HomeKitImport()
         }
     }
     
@@ -137,10 +131,6 @@ struct Settings {
                 let fileURL = await exportPasswords(passwords)
                 await send(.internal(.exportPasswordsCompleted(fileURL)))
             }
-            
-        case .onImportFromHomeKitButtonTapped:
-            state.homeKitImport = HomeKitImport.State()
-            return .none
             
         case .onRateAppButtonTapped:
             if let scene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {

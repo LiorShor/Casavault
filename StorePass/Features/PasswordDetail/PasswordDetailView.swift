@@ -22,8 +22,12 @@ struct PasswordDetailView: View {
             Group {
                 notesSection
                 attachmentsSection
-                metadataSection
+                qrCodeScanSection
             }
+            
+            homeKitBarcodeSection
+            
+            metadataSection
             
             deleteSection
         }
@@ -58,8 +62,20 @@ struct PasswordDetailView: View {
     private var passwordSection: some View {
         Section {
                 if store.isEditing {
-                    TextField(.localized(.password), text: $store.editedValue.sending(\.view.valueChanged))
-                        .textFieldStyle(.plain)
+                    HStack {
+                        TextField(.localized(.password), text: Binding(
+                            get: { store.editedValue },
+                            set: { store.send(.view(.valueChanged($0))) }
+                        ))
+                            .textFieldStyle(.plain)
+                            .keyboardType(.numberPad)
+                        
+                        // Show validation icon only if the value is long enough to potentially be valid
+                        if store.editedValue.count >= 8 {
+                            Image(systemName: store.isValidPassword ? "checkmark.circle.fill" : "exclamationmark.circle.fill")
+                                .foregroundStyle(store.isValidPassword ? .green : .red)
+                        }
+                    }
                 } else {
                     HStack {
                         Text(.localized(.password))
@@ -71,6 +87,12 @@ struct PasswordDetailView: View {
                 }
             } header: {
                 Text(.localized(.password))
+            } footer: {
+                if store.isEditing && !store.editedValue.isEmpty && !store.isValidPassword {
+                    Text(.localized(.passwordValidationError))
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                }
             }
     }
     
@@ -248,7 +270,7 @@ struct PasswordDetailView: View {
                             .foregroundStyle(.blue)
                     }
                 }
-                .disabled(store.editedName.isEmpty || store.editedValue.isEmpty || store.isSaving)
+                .disabled(!store.canSave || store.isSaving)
             }
             
             ToolbarItem(placement: .cancellationAction) {
@@ -266,6 +288,37 @@ struct PasswordDetailView: View {
                     Text(.localized(.edit))
                 }
             }
+        }
+    }
+    
+    @ViewBuilder
+    private var qrCodeScanSection: some View {
+        if store.isEditing {
+            Section {
+                Button {
+                    store.send(.view(.scanQRCode))
+                } label: {
+                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                }
+            } header: {
+                Text("Setup Code")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var homeKitBarcodeSection: some View {
+        if !store.password.value.isEmpty {
+            Section {
+                HomeKitBarcodeView(
+                    code: store.password.value,
+                    qrCodePayload: nil
+                )
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            } header: {
+                Text(.localized(.homeKitSetupCode))
+            }
+            .listRowBackground(Color.clear)
         }
     }
     

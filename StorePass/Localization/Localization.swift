@@ -93,6 +93,14 @@ public enum Localization {
     case rateApp
     case support
     case deleteDevice
+    case homeKitSetupCode
+    case passwordValidationError
+    case addDeviceOptions
+    case addNewDevice
+    case importFromSmartHome
+    case deleteDeviceConfirmation
+    case selectAll
+    case deselectAll
 }
 
 public extension String {

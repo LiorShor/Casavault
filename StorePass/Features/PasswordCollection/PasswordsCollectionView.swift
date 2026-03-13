@@ -108,8 +108,18 @@ struct PasswordsCollectionView: View {
             }
             
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    store.send(.view(.onAddPasswordButtonTapped))
+                Menu {
+                    Button {
+                        store.send(.view(.onAddPasswordButtonTapped))
+                    } label: {
+                        Label(.localized(.addNewDevice), systemImage: "plus.circle")
+                    }
+                    
+                    Button {
+                        store.send(.view(.onImportFromHomeKitButtonTapped))
+                    } label: {
+                        Label(.localized(.importFromSmartHome), systemImage: "homekit")
+                    }
                 } label: {
                     Label(.localized(.addPassword), systemImage: "plus")
                 }

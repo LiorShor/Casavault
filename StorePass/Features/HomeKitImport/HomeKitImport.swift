@@ -23,16 +23,23 @@ struct HomeKitImport {
         var isLoading: Bool = false
         var loadingError: String?
         var isImporting: Bool = false
-        var existingPasswordNames: Set<String> = []
+        var existingPasswords: [Password] = []
         var currentHomeId: UUID?
         var currentHomeKitHomeId: UUID?
+        @Presents var deleteConfirmation: DeleteConfirmationState?
         
         init() {}
         
         // Check if a device already has a password saved
-        func hasPassword(for device: HomeKitDevice) -> Bool {
-            return existingPasswordNames.contains(device.name)
+        func hasPassword(for device: HomeKitDevice) -> Password? {
+            return existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
         }
+    }
+    
+    struct DeleteConfirmationState: Equatable, Identifiable {
+        let id = UUID()
+        let device: HomeKitDevice
+        let password: Password
     }
     
     enum Action: Equatable {
@@ -43,6 +50,9 @@ struct HomeKitImport {
             case importButtonTapped
             case cancelButtonTapped
             case retryButtonTapped
+            case confirmDelete
+            case cancelDelete
+            case selectAllButtonTapped
         }
         
         @CasePathable
@@ -52,10 +62,12 @@ struct HomeKitImport {
             case existingPasswordsLoaded([Password])
             case importCompleted
             case currentHomeLoaded(Home?)
+            case passwordDeleted
         }
         
         case view(View)
         case `internal`(Internal)
+        case deleteConfirmation(PresentationAction<Never>)
     }
     
     var body: some Reducer<State, Action> {
@@ -66,7 +78,13 @@ struct HomeKitImport {
                 
             case let .internal(internalAction):
                 return reduceInternalAction(&state, internalAction)
+                
+            case .deleteConfirmation:
+                return .none
             }
+        }
+        .ifLet(\.$deleteConfirmation, action: \.deleteConfirmation) {
+            EmptyReducer()
         }
     }
     
@@ -107,10 +125,58 @@ struct HomeKitImport {
             }
             
         case let .deviceToggled(deviceId):
-            if state.selectedDeviceIds.contains(deviceId) {
-                state.selectedDeviceIds.remove(deviceId)
+            guard let device = state.devices.first(where: { $0.id == deviceId }) else {
+                return .none
+            }
+            
+            // Check if device is currently selected
+            let isCurrentlySelected = state.selectedDeviceIds.contains(deviceId)
+            
+            // Check if device already has a password
+            if let existingPassword = state.hasPassword(for: device) {
+                // Device has password
+                if isCurrentlySelected {
+                    // Trying to uncheck - show delete confirmation
+                    state.deleteConfirmation = DeleteConfirmationState(device: device, password: existingPassword)
+                    return .none
+                } else {
+                    // Trying to check - just select it
+                    state.selectedDeviceIds.insert(deviceId)
+                    return .none
+                }
             } else {
-                state.selectedDeviceIds.insert(deviceId)
+                // Device doesn't have password - toggle selection normally without confirmation
+                if isCurrentlySelected {
+                    state.selectedDeviceIds.remove(deviceId)
+                } else {
+                    state.selectedDeviceIds.insert(deviceId)
+                }
+                return .none
+            }
+            
+        case .confirmDelete:
+            guard let confirmation = state.deleteConfirmation else { return .none }
+            let passwordToDelete = confirmation.password
+            let deviceId = confirmation.device.id
+            
+            state.deleteConfirmation = nil
+            state.selectedDeviceIds.remove(deviceId)
+            
+            return .run { [passwordToDelete] send in
+                await passwordsUseCases.removePassword(passwordToDelete)
+                await send(.internal(.passwordDeleted))
+            }
+            
+        case .cancelDelete:
+            state.deleteConfirmation = nil
+            return .none
+            
+        case .selectAllButtonTapped:
+            // Select all devices that don't have passwords (new devices only)
+            for device in state.devices {
+                if state.hasPassword(for: device) == nil {
+                    state.selectedDeviceIds.insert(device.id)
+                }
             }
             return .none
             
@@ -171,6 +237,13 @@ struct HomeKitImport {
         case let .devicesLoaded(devices):
             state.isLoading = false
             state.devices = devices
+            // Pre-select devices that already have passwords (after devices are loaded)
+            for password in state.existingPasswords {
+                if let homeKitId = password.homeKitUniqueIdentifier,
+                   let device = devices.first(where: { $0.uniqueIdentifier == homeKitId }) {
+                    state.selectedDeviceIds.insert(device.id)
+                }
+            }
             return .none
             
         case let .loadingFailed(error):
@@ -179,8 +252,16 @@ struct HomeKitImport {
             return .none
             
         case let .existingPasswordsLoaded(passwords):
-            state.existingPasswordNames = Set(passwords.map { $0.name })
+            state.existingPasswords = passwords
             return .none
+            
+        case .passwordDeleted:
+            // Reload existing passwords after deletion
+            guard let currentHomeId = state.currentHomeId else { return .none }
+            return .run { send in
+                let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
+                await send(.internal(.existingPasswordsLoaded(existingPasswords)))
+            }
             
         case .importCompleted:
             state.isImporting = false

@@ -70,18 +70,6 @@ struct SettingsView: View {
                 // Data Section
                 Section {
                     Button {
-                        store.send(.view(.onImportFromHomeKitButtonTapped))
-                    } label: {
-                        HStack {
-                            Image(systemName: "homekit")
-                                .foregroundStyle(.blue)
-                                .frame(width: 24)
-                            Text(.localized(.homeKitImport))
-                                .foregroundStyle(.primary)
-                        }
-                    }
-                    
-                    Button {
                         store.send(.view(.onExportButtonTapped))
                     } label: {
                         HStack {
@@ -133,9 +121,6 @@ struct SettingsView: View {
                 if let shareSheetState = store.shareSheet {
                     ShareSheet(items: [shareSheetState.fileURL])
                 }
-            }
-            .sheet(item: $store.scope(state: \.homeKitImport, action: \.homeKitImport)) { homeKitImportStore in
-                HomeKitImportView(store: homeKitImportStore)
             }
         }
     }

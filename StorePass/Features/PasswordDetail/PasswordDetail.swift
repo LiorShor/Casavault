@@ -10,6 +10,7 @@ import ComposableArchitecture
 import SwiftUI
 import PhotosUI
 import UIKit
+import HomeKit
 
 @Reducer
 struct PasswordDetail {
@@ -33,6 +34,18 @@ struct PasswordDetail {
         var showingImageSourcePicker: Bool = false
         var pendingImageSourceType: UIImagePickerController.SourceType = .photoLibrary
         var showingImagePicker: Bool = false
+        
+        // Validation
+        var isValidPassword: Bool {
+            let homeKitCodeRegex = /^\d{3}-\d{2}-\d{3}$/  // XXX-XX-XXX (8 digits)
+            let matterCodeRegex = /^\d{4}-\d{3}-\d{4}$/   // XXXX-XXX-XXXX (11 digits)
+            return editedValue.wholeMatch(of: homeKitCodeRegex) != nil || 
+                   editedValue.wholeMatch(of: matterCodeRegex) != nil
+        }
+        
+        var canSave: Bool {
+            !editedName.isEmpty && isValidPassword
+        }
         
         init(password: Password) {
             self.password = password
@@ -65,6 +78,8 @@ struct PasswordDetail {
             case imageSourcePickerCancelled
             case imagePickerDismissed
             case imageSelected(Data)
+            case scanQRCode
+            case qrCodeScanned(String)
         }
         
         @CasePathable
@@ -139,7 +154,8 @@ struct PasswordDetail {
             return .none
             
         case .onSaveButtonTapped:
-            guard !state.editedName.isEmpty else {
+            // Validate before saving
+            guard state.canSave else {
                 return .none
             }
             
@@ -169,7 +185,8 @@ struct PasswordDetail {
             return .none
             
         case let .valueChanged(value):
-            state.editedValue = value
+            // Auto-format the password with dashes as user types
+            state.editedValue = formatPassword(value)
             return .none
             
         case let .roomSelected(room):
@@ -232,6 +249,16 @@ struct PasswordDetail {
             state.password.attachments?.append(attachment)
             state.showingImagePicker = false
             return .none
+            
+        case .scanQRCode:
+            // This will be handled by the navigator - show QR scanner
+            // For now, just a placeholder
+            return .none
+            
+        case let .qrCodeScanned(payload):
+            // Store the scanned QR code as the password value
+            state.password.value = payload
+            return .none
         }
     }
     
@@ -262,6 +289,38 @@ struct PasswordDetail {
                 state.availableRooms.sort()
             }
             return .none
+        }
+    }
+    
+    // Format password with dashes as user types
+    private func formatPassword(_ input: String) -> String {
+        // Remove all non-digit characters
+        let digits = input.filter { $0.isNumber }
+        
+        // Limit to 11 digits max
+        let limitedDigits = String(digits.prefix(11))
+        
+        // Determine format based on length
+        if limitedDigits.count <= 8 {
+            // HomeKit format: XXX-XX-XXX (8 digits)
+            var formatted = ""
+            for (index, char) in limitedDigits.enumerated() {
+                if index == 3 || index == 5 {
+                    formatted.append("-")
+                }
+                formatted.append(char)
+            }
+            return formatted
+        } else {
+            // Matter format: XXXX-XXX-XXXX (11 digits)
+            var formatted = ""
+            for (index, char) in limitedDigits.enumerated() {
+                if index == 4 || index == 7 {
+                    formatted.append("-")
+                }
+                formatted.append(char)
+            }
+            return formatted
         }
     }
 }

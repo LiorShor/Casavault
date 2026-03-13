@@ -45,11 +45,39 @@ struct HomeKitImportView: View {
                     }
                     .disabled(store.selectedDeviceIds.isEmpty || store.isImporting)
                 }
+                
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        store.send(.view(.selectAllButtonTapped))
+                    } label: {
+                        Text(.localized(.selectAll))
+                    }
+                    .disabled(store.devices.isEmpty || store.isLoading)
+                }
             }
         }
         .onAppear {
             store.send(.view(.onAppear))
         }
+        .alert(
+            .localized(.deleteDevice),
+            isPresented: Binding(
+                get: { store.deleteConfirmation != nil },
+                set: { if !$0 { store.send(.view(.cancelDelete)) } }
+            ),
+            actions: {
+                Button(.localized(.delete), role: .destructive) {
+                    store.send(.view(.confirmDelete))
+                }
+                
+                Button(.localized(.cancel), role: .cancel) {
+                    store.send(.view(.cancelDelete))
+                }
+            },
+            message: {
+                Text(.localized(.deleteDeviceConfirmation))
+            }
+        )
     }
     
     @ViewBuilder
@@ -97,10 +125,11 @@ struct HomeKitImportView: View {
             List {
                 Section {
                     ForEach(store.devices) { device in
+                        let hasPassword = store.existingPasswords.contains(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
                         DeviceRow(
                             device: device,
                             isSelected: store.selectedDeviceIds.contains(device.id),
-                            hasPassword: store.existingPasswordNames.contains(device.name)
+                            hasPassword: hasPassword
                         ) {
                             store.send(.view(.deviceToggled(device.id)))
                         }
@@ -154,18 +183,9 @@ struct DeviceRow: View {
                     .font(.title3)
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(device.name)
-                            .font(.body)
-                            .foregroundStyle(.primary)
-                        
-                        // Indicator for devices that already have a password
-                        if hasPassword {
-                            Image(systemName: "key.fill")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
-                    }
+                    Text(device.name)
+                        .font(.body)
+                        .foregroundStyle(.primary)
                     
                     HStack(spacing: 8) {
                         if let roomName = device.roomName {
