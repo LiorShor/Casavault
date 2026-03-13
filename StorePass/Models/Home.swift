@@ -6,27 +6,37 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 
-@Model
-final class Home: Equatable, Identifiable {
+@objc(Home)
+public class Home: NSManagedObject, Identifiable {
     
-    var id: UUID
-    var name: String
-    var isDefault: Bool
-    var homeKitUniqueIdentifier: UUID? // For syncing with HomeKit homes
-    var createdAt: Date
-    var updatedAt: Date?
+    @NSManaged public var id: UUID
+    @NSManaged public var name: String
+    @NSManaged public var isDefault: Bool
+    @NSManaged public var homeKitUniqueIdentifier: UUID?
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date?
     
-    init(name: String, isDefault: Bool = false, homeKitUniqueIdentifier: UUID? = nil, createdAt: Date = Date(), updatedAt: Date? = nil) {
-        self.id = UUID()
+    // Relationship to passwords
+    @NSManaged public var passwords: Set<Password>?
+    
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        setPrimitiveValue(UUID(), forKey: "id")
+        setPrimitiveValue(Date(), forKey: "createdAt")
+        setPrimitiveValue(false, forKey: "isDefault")
+    }
+    
+    convenience init(context: NSManagedObjectContext, name: String, isDefault: Bool = false, homeKitUniqueIdentifier: UUID? = nil) {
+        self.init(context: context)
         self.name = name
         self.isDefault = isDefault
         self.homeKitUniqueIdentifier = homeKitUniqueIdentifier
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
     }
-    
+}
+
+extension Home {
     static func == (lhs: Home, rhs: Home) -> Bool {
         return lhs.id == rhs.id
     }

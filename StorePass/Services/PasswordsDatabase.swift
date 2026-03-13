@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 import Dependencies
 
 extension DependencyValues {
@@ -18,7 +18,6 @@ extension DependencyValues {
 
 struct PasswordsDatabase {
     var fetchAll: @MainActor @Sendable () throws -> [Password]
-    var fetch: @MainActor @Sendable (FetchDescriptor<Password>) throws -> [Password]
     var add: @MainActor @Sendable (Password) throws -> Void
     var delete: @MainActor @Sendable (Password) throws -> Void
     var update: @MainActor @Sendable (Password) throws -> Void
@@ -35,75 +34,63 @@ extension PasswordsDatabase: DependencyKey {
         fetchAll: { @MainActor in
             do {
                 @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
-                
-                let descriptor = FetchDescriptor<Password>(sortBy: [SortDescriptor(\.id)])
-                return try movieContext.fetch(descriptor)
-            } catch {
-                return []
-            }
-        },
-        fetch: { @MainActor descriptor in
-            do {
-                @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
-                return try movieContext.fetch(descriptor)
+                let passwordContext = try context()
+
+                let fetchRequest: NSFetchRequest<Password> = NSFetchRequest(entityName: "Password")
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+                return try passwordContext.fetch(fetchRequest)
             } catch {
                 return []
             }
         },
         add: { @MainActor model in
+            @Dependency(\.databaseService) var database
+
+            // Model is already inserted in the context via init
             do {
-                @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
-                
-                movieContext.insert(model)
+                try database.saveContext()
             } catch {
                 throw PasswordError.add
             }
         },
         delete: { @MainActor model in
             do {
+                @Dependency(\.databaseService) var database
                 @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
-                
-                let modelToBeDelete = model
-                movieContext.delete(modelToBeDelete)
+                let passwordContext = try context()
+
+                passwordContext.delete(model)
+                try database.saveContext()
             } catch {
                 throw PasswordError.delete
             }
         },
         update: { @MainActor model in
             do {
-                @Dependency(\.databaseService.context) var context
-                let movieContext = try context()
-                
-                // SwiftData automatically tracks changes to model objects
-                // We just need to ensure the context saves
-                try movieContext.save()
+                @Dependency(\.databaseService) var database
+                model.updatedAt = Date()
+                try database.saveContext()
             } catch {
                 throw PasswordError.update
             }
         }
     )
 }
+
 extension PasswordsDatabase: TestDependencyKey {
     public static var previewValue = Self.noop
-    
+
     public static let testValue = Self(
         fetchAll: unimplemented("\(Self.self).fetch"),
-        fetch: unimplemented("\(Self.self).fetchDescriptor"),
         add: unimplemented("\(Self.self).add"),
         delete: unimplemented("\(Self.self).delete"),
         update: unimplemented("\(Self.self).update")
     )
-    
+
     static let noop = Self(
         fetchAll: { [] },
-        fetch: { _ in [] },
         add: { _ in },
         delete: { _ in },
         update: { _ in }
     )
 }
-

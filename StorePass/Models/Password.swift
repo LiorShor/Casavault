@@ -6,28 +6,36 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 
-@Model
-final class Password: Equatable, Identifiable {
+@objc(Password)
+public class Password: NSManagedObject, Identifiable {
     
-    var id: UUID
-    var name: String
-    var value: String
-    var room: String?
-    var icon: String? // SF Symbol name
-    var homeId: UUID? // The home this password belongs to
-    var homeKitUniqueIdentifier: UUID? // For syncing with HomeKit devices
-    var notes: String? // User notes for this password
-    var createdAt: Date
-    var updatedAt: Date?
+    @NSManaged public var id: UUID
+    @NSManaged public var name: String
+    @NSManaged public var value: String
+    @NSManaged public var room: String?
+    @NSManaged public var icon: String?
+    @NSManaged public var homeId: UUID?
+    @NSManaged public var homeKitUniqueIdentifier: UUID?
+    @NSManaged public var notes: String?
+    @NSManaged public var createdAt: Date
+    @NSManaged public var updatedAt: Date?
     
-    // Relationship to attachments
-    @Relationship(deleteRule: .cascade, inverse: \PasswordAttachment.password)
-    var attachments: [PasswordAttachment]? = []
+    // Relationship to attachments (one-to-many)
+    @NSManaged public var attachments: Set<PasswordAttachment>?
     
-    init(name: String, value: String, room: String? = nil, icon: String? = nil, homeId: UUID? = nil, homeKitUniqueIdentifier: UUID? = nil, notes: String? = nil, createdAt: Date = Date(), updatedAt: Date? = nil) {
-        self.id = UUID()
+    // Relationship to home (many-to-one)
+    @NSManaged public var home: Home?
+    
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        setPrimitiveValue(UUID(), forKey: "id")
+        setPrimitiveValue(Date(), forKey: "createdAt")
+    }
+    
+    convenience init(context: NSManagedObjectContext, name: String, value: String, room: String? = nil, icon: String? = nil, homeId: UUID? = nil, homeKitUniqueIdentifier: UUID? = nil, notes: String? = nil) {
+        self.init(context: context)
         self.name = name
         self.value = value
         self.room = room
@@ -35,11 +43,10 @@ final class Password: Equatable, Identifiable {
         self.homeId = homeId
         self.homeKitUniqueIdentifier = homeKitUniqueIdentifier
         self.notes = notes
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.attachments = []
     }
-    
+}
+
+extension Password {
     static func == (lhs: Password, rhs: Password) -> Bool {
         return lhs.id == rhs.id
     }

@@ -6,22 +6,29 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 
-@Model
-final class PasswordAttachment: Identifiable {
-    var id: UUID
-    var imageData: Data? // Store the image as Data
-    var fileName: String
-    var createdAt: Date
+@objc(PasswordAttachment)
+public class PasswordAttachment: NSManagedObject, Identifiable {
     
-    // Relationship to Password
-    var password: Password?
+    @NSManaged public var id: UUID
+    @NSManaged public var imageData: Data?
+    @NSManaged public var fileName: String
+    @NSManaged public var createdAt: Date
     
-    init(imageData: Data?, fileName: String = "attachment", createdAt: Date = Date()) {
-        self.id = UUID()
+    // Relationship to Password (many-to-one)
+    @NSManaged public var password: Password?
+    
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        setPrimitiveValue(UUID(), forKey: "id")
+        setPrimitiveValue(Date(), forKey: "createdAt")
+        setPrimitiveValue("attachment", forKey: "fileName")
+    }
+    
+    convenience init(context: NSManagedObjectContext, imageData: Data?, fileName: String = "attachment") {
+        self.init(context: context)
         self.imageData = imageData
         self.fileName = fileName
-        self.createdAt = createdAt
     }
 }

@@ -20,6 +20,7 @@ struct HomesCollection {
         var isImporting: Bool = false
         var isAddingNewHome: Bool = false
         var newHomeName: String = ""
+        var sharingHome: Home?
         
         var isHomeNameValid: Bool {
             !newHomeName.isEmpty && !homes.contains(where: { $0.name.lowercased() == newHomeName.lowercased() })
@@ -46,6 +47,7 @@ struct HomesCollection {
             case saveNewHome
             case cancelAddingHome
             case onSettingsButtonTapped
+            case onShareHome(Home)
         }
         
         @CasePathable
@@ -140,7 +142,9 @@ struct HomesCollection {
             state.newHomeName = ""
             
             return .run { @MainActor send in
-                let newHome = Home(name: homeName)
+                @Dependency(\.databaseService.context) var getContext
+                let context = try getContext()
+                let newHome = Home(context: context, name: homeName)
                 await homeUseCases.addHome(newHome)
                 let updatedHomes = await homeUseCases.fetchHomes()
                 send(.homesLoaded(updatedHomes))
@@ -153,6 +157,10 @@ struct HomesCollection {
             
         case .onSettingsButtonTapped:
             return .send(.navigation(.presentSettings))
+            
+        case let .onShareHome(home):
+            state.sharingHome = home
+            return .none
         }
     }
 }

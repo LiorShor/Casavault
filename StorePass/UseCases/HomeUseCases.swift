@@ -7,7 +7,7 @@
 
 import Foundation
 import Dependencies
-import SwiftData
+import CoreData
 
 struct HomeUseCases {
     var fetchHomes: () async -> [Home]
@@ -28,7 +28,11 @@ extension HomeUseCases: DependencyKey {
         },
         addHome: { home in
             @Dependency(\.homeDatabase) var db
-            do { return try db.add(home) }
+            @Dependency(\.databaseService.context) var context
+            do {
+                // Home object should already be created with context
+                return try db.add(home)
+            }
             catch { }
         },
         removeHome: { home in
@@ -72,11 +76,16 @@ extension HomeUseCases: DependencyKey {
                 let existingHomes = try db.fetchAll()
                 let existingHomeKitIds = Set(existingHomes.compactMap { $0.homeKitUniqueIdentifier })
                 
+                // Get the context for creating new homes
+                @Dependency(\.databaseService.context) var getContext
+                let context = try getContext()
+                
                 // Create Home objects from HomeKit homes that don't exist yet
                 var newHomes: [Home] = []
                 for homeKitHome in homeKitHomes {
                     if !existingHomeKitIds.contains(homeKitHome.uniqueIdentifier) {
                         let home = Home(
+                            context: context,
                             name: homeKitHome.name,
                             homeKitUniqueIdentifier: homeKitHome.uniqueIdentifier
                         )

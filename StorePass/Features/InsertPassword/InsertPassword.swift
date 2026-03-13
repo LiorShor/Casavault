@@ -181,7 +181,9 @@ struct InsertPassword {
                 let room = state.selectedRoom
                 let icon = state.selectedIcon
                 return .run { send in
-                    let password = Password(name: deviceName, value: code, room: room, icon: icon, homeId: homeId, homeKitUniqueIdentifier: nil, notes: nil, createdAt: Date(), updatedAt: nil)
+                    @Dependency(\.databaseService.context) var getContext
+                    let context = try getContext()
+                    let password = Password(context: context, name: deviceName, value: code, room: room, icon: icon, homeId: homeId, homeKitUniqueIdentifier: nil, notes: nil)
                     await passwords.addPassword(password)
                     await dismiss()
                 }

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 import Dependencies
 
 extension DependencyValues {
@@ -18,7 +18,6 @@ extension DependencyValues {
 
 struct HomeDatabase {
     var fetchAll: @MainActor @Sendable () throws -> [Home]
-    var fetch: @MainActor @Sendable (FetchDescriptor<Home>) throws -> [Home]
     var add: @MainActor @Sendable (Home) throws -> Void
     var delete: @MainActor @Sendable (Home) throws -> Void
     var update: @MainActor @Sendable (Home) throws -> Void
@@ -40,50 +39,41 @@ extension HomeDatabase: DependencyKey {
                 @Dependency(\.databaseService.context) var context
                 let homeContext = try context()
                 
-                let descriptor = FetchDescriptor<Home>(sortBy: [SortDescriptor(\.createdAt)])
-                return try homeContext.fetch(descriptor)
-            } catch {
-                return []
-            }
-        },
-        fetch: { @MainActor descriptor in
-            do {
-                @Dependency(\.databaseService.context) var context
-                let homeContext = try context()
-                return try homeContext.fetch(descriptor)
+                let fetchRequest: NSFetchRequest<Home> = NSFetchRequest(entityName: "Home")
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
+                return try homeContext.fetch(fetchRequest)
             } catch {
                 return []
             }
         },
         add: { @MainActor model in
+            @Dependency(\.databaseService) var database
+            @Dependency(\.databaseService.context) var context
+            
+            // Model is already inserted in the context via init
             do {
-                @Dependency(\.databaseService.context) var context
-                let homeContext = try context()
-                
-                homeContext.insert(model)
+                try database.saveContext()
             } catch {
                 throw HomeError.add
             }
         },
         delete: { @MainActor model in
             do {
+                @Dependency(\.databaseService) var database
                 @Dependency(\.databaseService.context) var context
                 let homeContext = try context()
                 
-                let modelToBeDelete = model
-                homeContext.delete(modelToBeDelete)
+                homeContext.delete(model)
+                try database.saveContext()
             } catch {
                 throw HomeError.delete
             }
         },
         update: { @MainActor model in
             do {
-                @Dependency(\.databaseService.context) var context
-                let homeContext = try context()
-                
-                // SwiftData automatically tracks changes to model objects
-                // We just need to ensure the context saves
-                try homeContext.save()
+                @Dependency(\.databaseService) var database
+                model.updatedAt = Date()
+                try database.saveContext()
             } catch {
                 throw HomeError.update
             }
@@ -93,9 +83,10 @@ extension HomeDatabase: DependencyKey {
                 @Dependency(\.databaseService.context) var context
                 let homeContext = try context()
                 
-                var descriptor = FetchDescriptor<Home>()
-                descriptor.predicate = #Predicate { $0.isDefault == true }
-                let homes = try homeContext.fetch(descriptor)
+                let fetchRequest: NSFetchRequest<Home> = NSFetchRequest(entityName: "Home")
+                fetchRequest.predicate = NSPredicate(format: "isDefault == YES")
+                fetchRequest.fetchLimit = 1
+                let homes = try homeContext.fetch(fetchRequest)
                 return homes.first
             } catch {
                 return nil
@@ -103,12 +94,13 @@ extension HomeDatabase: DependencyKey {
         },
         setDefaultHome: { @MainActor home in
             do {
+                @Dependency(\.databaseService) var database
                 @Dependency(\.databaseService.context) var context
                 let homeContext = try context()
                 
                 // First, unset all other homes as default
-                let descriptor = FetchDescriptor<Home>()
-                let allHomes = try homeContext.fetch(descriptor)
+                let fetchRequest: NSFetchRequest<Home> = NSFetchRequest(entityName: "Home")
+                let allHomes = try homeContext.fetch(fetchRequest)
                 for existingHome in allHomes {
                     existingHome.isDefault = false
                 }
@@ -117,7 +109,7 @@ extension HomeDatabase: DependencyKey {
                 home.isDefault = true
                 home.updatedAt = Date()
                 
-                try homeContext.save()
+                try database.saveContext()
             } catch {
                 throw HomeError.update
             }
@@ -130,7 +122,6 @@ extension HomeDatabase: TestDependencyKey {
     
     public static let testValue = Self(
         fetchAll: unimplemented("\(Self.self).fetchAll"),
-        fetch: unimplemented("\(Self.self).fetch"),
         add: unimplemented("\(Self.self).add"),
         delete: unimplemented("\(Self.self).delete"),
         update: unimplemented("\(Self.self).update"),
@@ -140,7 +131,6 @@ extension HomeDatabase: TestDependencyKey {
     
     static let noop = Self(
         fetchAll: { [] },
-        fetch: { _ in [] },
         add: { _ in },
         delete: { _ in },
         update: { _ in },

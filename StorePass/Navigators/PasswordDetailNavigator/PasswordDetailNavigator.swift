@@ -172,10 +172,22 @@ struct PasswordDetailNavigator {
             return .none
             
         case let .imageSelected(imageData):
-            let attachment = PasswordAttachment(imageData: imageData)
-            attachment.password = state.passwordDetail.password
-            state.passwordDetail.password.attachments?.append(attachment)
-            state.showingImagePicker = false
+            @Dependency(\.databaseService.context) var getContext
+            do {
+                let context = try getContext()
+                let attachment = PasswordAttachment(context: context, imageData: imageData)
+                attachment.password = state.passwordDetail.password
+                
+                // In Core Data, we need to insert to a set
+                if state.passwordDetail.password.attachments == nil {
+                    state.passwordDetail.password.attachments = []
+                }
+                state.passwordDetail.password.attachments?.insert(attachment)
+                state.showingImagePicker = false
+            } catch {
+                // Handle error
+                state.showingImagePicker = false
+            }
             return .none
             
         case .qrScannerDismissed:

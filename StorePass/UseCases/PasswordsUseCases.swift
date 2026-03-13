@@ -7,7 +7,7 @@
 
 import Foundation
 import Dependencies
-import SwiftData
+import CoreData
 
 struct PasswordsUseCases {
     var fetchPasswords: () async -> [Password]
@@ -25,11 +25,13 @@ extension PasswordsUseCases: DependencyKey {
                 catch { return [] }
             },
         fetchPasswordsForHome: { homeId in
-            @Dependency(\.swiftData) var db
+            @Dependency(\.databaseService.context) var getContext
             do {
-                var descriptor = FetchDescriptor<Password>(sortBy: [SortDescriptor(\.id)])
-                descriptor.predicate = #Predicate { $0.homeId == homeId }
-                return try db.fetch(descriptor)
+                let context = try getContext()
+                let fetchRequest: NSFetchRequest<Password> = NSFetchRequest(entityName: "Password")
+                fetchRequest.predicate = NSPredicate(format: "homeId == %@", homeId as CVarArg)
+                fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+                return try context.fetch(fetchRequest)
             } catch {
                 return []
             }

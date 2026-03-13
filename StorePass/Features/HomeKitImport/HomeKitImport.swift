@@ -202,7 +202,10 @@ struct HomeKitImport {
                         }
                     } else {
                         // Create new password for this device with explicit homeId
+                        @Dependency(\.databaseService.context) var getContext
+                        let context = try getContext()
                         let password = Password(
+                            context: context,
                             name: device.name,
                             value: "", // Empty password - user needs to fill it in
                             room: device.roomName,

@@ -170,7 +170,7 @@ struct PasswordDetailView: View {
     private var attachmentsSection: some View {
         Section {
                 if let attachments = store.password.attachments, !attachments.isEmpty {
-                    ForEach(attachments) { attachment in
+                    ForEach(Array(attachments)) { attachment in
                         Button {
                             store.send(.view(.viewAttachment(attachment)))
                         } label: {
@@ -341,10 +341,13 @@ struct PasswordDetailView: View {
 }
 
 #Preview {
-    NavigationStack {
+    let context = CoreDataStack.shared.viewContext
+    let password = Password(context: context, name: "iPhone", value: "1234")
+    
+    return NavigationStack {
         PasswordDetailView(store: Store(
             initialState: PasswordDetail.State(
-                password: Password(name: "iPhone", value: "1234")
+                password: password
             ),
             reducer: { PasswordDetail() }
         ))

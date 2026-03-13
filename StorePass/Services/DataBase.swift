@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftData
+import CoreData
 import Dependencies
 
 extension DependencyValues {
@@ -17,23 +17,14 @@ extension DependencyValues {
 }
 
 struct Database {
-    private static let sharedContext: ModelContext = {
-        do {
-            let url = URL.applicationSupportDirectory.appending(path: "Model.sqlite")
-            let config = ModelConfiguration(url: url)
-            let container = try ModelContainer(for: Password.self, Home.self, PasswordAttachment.self, configurations: config)
-            return ModelContext(container)
-        } catch {
-            fatalError("Failed to create container")
-        }
-    }()
-    
-    var context: () throws -> ModelContext
+    var context: () throws -> NSManagedObjectContext
+    var saveContext: () throws -> Void
 }
 
 extension Database: DependencyKey {
     public static let liveValue = Self(
-        context: { sharedContext }
+        context: { CoreDataStack.shared.viewContext },
+        saveContext: { CoreDataStack.shared.saveContext() }
     )
 }
 
@@ -41,10 +32,12 @@ extension Database: TestDependencyKey {
     public static var previewValue = Self.noop
     
     public static let testValue = Self(
-        context: unimplemented("\(Self.self).context")
+        context: unimplemented("\(Self.self).context"),
+        saveContext: unimplemented("\(Self.self).saveContext")
     )
     
     static let noop = Self(
-        context: unimplemented("\(Self.self).context")
+        context: unimplemented("\(Self.self).context"),
+        saveContext: unimplemented("\(Self.self).saveContext")
     )
 }

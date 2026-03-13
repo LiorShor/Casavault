@@ -36,6 +36,27 @@ extension HomesCollection {
                                     Label(.localized(.delete), systemImage: "trash")
                                 }
                             }
+                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                                Button {
+                                    store.send(.view(.onShareHome(home)))
+                                } label: {
+                                    Label("Share", systemImage: "person.2")
+                                }
+                                .tint(.blue)
+                            }
+                            .contextMenu {
+                                Button {
+                                    store.send(.view(.onShareHome(home)))
+                                } label: {
+                                    Label("Share Home", systemImage: "square.and.arrow.up")
+                                }
+                                
+                                Button(role: .destructive) {
+                                    store.send(.view(.onDeleteHome(home)))
+                                } label: {
+                                    Label(.localized(.delete), systemImage: "trash")
+                                }
+                            }
                         }
                     } header: {
                         Text(.localized(.myHomes))
@@ -87,6 +108,18 @@ extension HomesCollection {
                 .sheet(isPresented: $store.isAddingNewHome) {
                     AddHomeSheet(store: store)
                 }
+                .sheet(item: Binding(
+                    get: { store.sharingHome },
+                    set: { newValue in
+                        if newValue == nil {
+                            store.send(.binding(.set(\.sharingHome, nil)))
+                        }
+                    }
+                )) { home in
+                    CloudSharingView(home: home)
+                        .presentationDetents([.large])
+                        .presentationDragIndicator(.visible)
+                }
             }
         }
     }
@@ -125,14 +158,15 @@ struct HomeRow: View {
 }
 
 #Preview {
-    HomesCollection.ContentView(
+    let context = CoreDataStack.shared.viewContext
+    let home1 = Home(context: context, name: "My Home", isDefault: true)
+    let home2 = Home(context: context, name: "Office", isDefault: false)
+    let home3 = Home(context: context, name: "Vacation Home", isDefault: false, homeKitUniqueIdentifier: UUID())
+    
+    return HomesCollection.ContentView(
         store: Store(
             initialState: HomesCollection.State(
-                homes: [
-                    Home(name: "My Home", isDefault: true),
-                    Home(name: "Office", isDefault: false),
-                    Home(name: "Vacation Home", isDefault: false, homeKitUniqueIdentifier: UUID())
-                ]
+                homes: [home1, home2, home3]
             ),
             reducer: HomesCollection.init
         )

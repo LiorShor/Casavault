@@ -212,7 +212,10 @@ struct PasswordDetail {
             return .none
             
         case let .deleteAttachment(attachment):
-            state.password.attachments?.removeAll(where: { $0.id == attachment.id })
+            // In Core Data, attachments is a Set, not an Array
+            if let attachments = state.password.attachments {
+                state.password.attachments = attachments.filter { $0.id != attachment.id }
+            }
             return .none
             
         case let .viewAttachment(attachment):
@@ -244,10 +247,21 @@ struct PasswordDetail {
             return .none
             
         case let .imageSelected(imageData):
-            let attachment = PasswordAttachment(imageData: imageData)
-            attachment.password = state.password
-            state.password.attachments?.append(attachment)
-            state.showingImagePicker = false
+            @Dependency(\.databaseService.context) var getContext
+            do {
+                let context = try getContext()
+                let attachment = PasswordAttachment(context: context, imageData: imageData)
+                attachment.password = state.password
+                
+                // In Core Data, attachments is a Set, not an Array
+                if state.password.attachments == nil {
+                    state.password.attachments = []
+                }
+                state.password.attachments?.insert(attachment)
+                state.showingImagePicker = false
+            } catch {
+                state.showingImagePicker = false
+            }
             return .none
             
         case .scanQRCode:
