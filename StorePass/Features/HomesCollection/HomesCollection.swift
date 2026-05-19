@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 import ComposableArchitecture
 import SwiftData
 import SwiftUI
@@ -17,21 +18,23 @@ struct HomesCollection {
     @ObservableState
     struct State: Equatable {
         var homes: [Home] = []
+        var defaultHomeId: UUID?
         var isImporting: Bool = false
+        var showPermissionDeniedAlert: Bool = false
         var isAddingNewHome: Bool = false
         var newHomeName: String = ""
-        var sharingHome: Home?
-        
+
         var isHomeNameValid: Bool {
             !newHomeName.isEmpty && !homes.contains(where: { $0.name.lowercased() == newHomeName.lowercased() })
         }
-        
+
         var homeNameExists: Bool {
             homes.contains(where: { $0.name.lowercased() == newHomeName.lowercased() })
         }
-        
+
         init(homes: [Home] = []) {
             self.homes = homes
+            self.defaultHomeId = homes.first(where: { $0.isDefault })?.id
         }
     }
     
@@ -47,7 +50,7 @@ struct HomesCollection {
             case saveNewHome
             case cancelAddingHome
             case onSettingsButtonTapped
-            case onShareHome(Home)
+            case openSettings
         }
         
         @CasePathable
@@ -55,7 +58,13 @@ struct HomesCollection {
             case presentSettings
         }
         
+        @CasePathable
+        enum Internal: Equatable {
+            case importPermissionDenied
+        }
+
         case view(View)
+        case `internal`(Internal)
         case navigation(Navigation)
         case homesLoaded([Home])
         case importCompleted
@@ -71,12 +80,18 @@ struct HomesCollection {
                 
             case let .view(viewAction):
                 return reduceViewAction(&state, viewAction)
-                
+
+            case .internal(.importPermissionDenied):
+                state.isImporting = false
+                state.showPermissionDeniedAlert = true
+                return .none
+
             case .navigation:
                 return .none
                 
             case let .homesLoaded(homes):
                 state.homes = homes
+                state.defaultHomeId = homes.first(where: { $0.isDefault })?.id
                 // Auto-mark as default if there's only one home and no default is set
                 if homes.count == 1, let singleHome = homes.first, !singleHome.isDefault {
                     return .run { @MainActor [singleHome] send in
@@ -109,8 +124,14 @@ struct HomesCollection {
         case .onImportFromHomeKitTapped:
             state.isImporting = true
             return .run { send in
-                _ = await homeUseCases.importFromHomeKit()
-                await send(.importCompleted)
+                do {
+                    _ = try await homeUseCases.importFromHomeKit()
+                    await send(.importCompleted)
+                } catch HomeKitError.permissionDenied {
+                    await send(.internal(.importPermissionDenied))
+                } catch {
+                    await send(.importCompleted)
+                }
             }
             
         case let .onDeleteHome(home):
@@ -125,6 +146,7 @@ struct HomesCollection {
             return .none
             
         case let .toggleDefaultHome(home):
+            state.defaultHomeId = home.id  // immediate visual feedback
             return .run { @MainActor [home] send in
                 await homeUseCases.setDefaultHome(home)
                 let updatedHomes = await homeUseCases.fetchHomes()
@@ -157,10 +179,13 @@ struct HomesCollection {
             
         case .onSettingsButtonTapped:
             return .send(.navigation(.presentSettings))
-            
-        case let .onShareHome(home):
-            state.sharingHome = home
-            return .none
+
+        case .openSettings:
+            return .run { _ in
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    await MainActor.run { UIApplication.shared.open(url) }
+                }
+            }
         }
     }
 }

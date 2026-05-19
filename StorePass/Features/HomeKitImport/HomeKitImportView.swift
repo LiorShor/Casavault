@@ -12,10 +12,12 @@ struct HomeKitImportView: View {
     @Bindable var store: StoreOf<HomeKitImport>
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 if store.isLoading {
                     loadingView
+                } else if store.isPermissionDenied {
+                    permissionDeniedView
                 } else if let error = store.loadingError {
                     errorView(error: error)
                 } else {
@@ -29,7 +31,7 @@ struct HomeKitImportView: View {
                     Button {
                         store.send(.view(.cancelButtonTapped))
                     } label: {
-                        Image(systemName: "xmark")
+                        Label(.localized(.cancel), systemImage: "xmark")
                     }
                 }
                 
@@ -43,16 +45,16 @@ struct HomeKitImportView: View {
                             Text(.localized(.importButton))
                         }
                     }
-                    .disabled(store.selectedDeviceIds.isEmpty || store.isImporting)
+                    .disabled(store.selectedDeviceIds.isEmpty || store.isImporting || store.isPermissionDenied)
                 }
                 
                 ToolbarItem(placement: .bottomBar) {
                     Button {
                         store.send(.view(.selectAllButtonTapped))
                     } label: {
-                        Text(.localized(.selectAll))
+                        Text(.localized(store.areAllSelectableDevicesSelected ? .deselectAll : .selectAll))
                     }
-                    .disabled(store.devices.isEmpty || store.isLoading)
+                    .disabled(store.devices.isEmpty || store.isLoading || store.isPermissionDenied)
                 }
             }
         }
@@ -90,6 +92,35 @@ struct HomeKitImportView: View {
     }
     
     @ViewBuilder
+    private var permissionDeniedView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 56))
+                .foregroundStyle(.secondary)
+
+            Text(.localized(.homeKitPermissionDenied))
+                .font(.headline)
+                .multilineTextAlignment(.center)
+
+            Text(.localized(.homeKitPermissionDeniedDescription))
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+
+            Button {
+                store.send(.view(.openSettings))
+            } label: {
+                Text(.localized(.openSettings))
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+
+    @ViewBuilder
     private func errorView(error: String) -> some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
@@ -126,6 +157,7 @@ struct HomeKitImportView: View {
                 Section {
                     ForEach(store.devices) { device in
                         let hasPassword = store.existingPasswords.contains(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
+                            || store.existingPasswords.contains(where: { $0.name == device.name })
                         DeviceRow(
                             device: device,
                             isSelected: store.selectedDeviceIds.contains(device.id),
@@ -179,7 +211,7 @@ struct DeviceRow: View {
             HStack(spacing: 12) {
                 // Selection indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(isSelected ? .blue : .secondary)
+                    .foregroundStyle(isSelected ? Color.accentColor : .secondary)
                     .font(.title3)
                 
                 VStack(alignment: .leading, spacing: 4) {

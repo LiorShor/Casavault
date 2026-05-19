@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import UIKit
+import CoreData
 import ComposableArchitecture
 import HomeKit
 
@@ -22,6 +24,7 @@ struct HomeKitImport {
         var selectedDeviceIds: Set<UUID> = []
         var isLoading: Bool = false
         var loadingError: String?
+        var isPermissionDenied: Bool = false
         var isImporting: Bool = false
         var existingPasswords: [Password] = []
         var currentHomeId: UUID?
@@ -30,9 +33,20 @@ struct HomeKitImport {
         
         init() {}
         
-        // Check if a device already has a password saved
+        var areAllSelectableDevicesSelected: Bool {
+            let selectable = devices.filter { hasPassword(for: $0) == nil }
+            return !selectable.isEmpty && selectable.allSatisfy { selectedDeviceIds.contains($0.id) }
+        }
+
+        // Check if a device already has a password saved.
+        // HomeKit UUIDs (uniqueIdentifier) change on every reinstall, so UUID match alone is not enough.
+        // Falls back to name matching, preferring passwords from the current home.
         func hasPassword(for device: HomeKitDevice) -> Password? {
-            return existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
+            if let match = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier }) {
+                return match
+            }
+            let byName = existingPasswords.filter { $0.name == device.name }
+            return byName.first(where: { $0.homeId == currentHomeId }) ?? byName.first
         }
     }
     
@@ -50,6 +64,7 @@ struct HomeKitImport {
             case importButtonTapped
             case cancelButtonTapped
             case retryButtonTapped
+            case openSettings
             case confirmDelete
             case cancelDelete
             case selectAllButtonTapped
@@ -59,6 +74,7 @@ struct HomeKitImport {
         enum Internal: Equatable {
             case devicesLoaded([HomeKitDevice])
             case loadingFailed(String)
+            case permissionDenied
             case existingPasswordsLoaded([Password])
             case importCompleted
             case currentHomeLoaded(Home?)
@@ -94,35 +110,68 @@ struct HomeKitImport {
         case .onAppear:
             state.isLoading = true
             state.loadingError = nil
-            
-            return .run { send in
-                do {
-                    // Load current home first
-                    let defaultHome = await homeUseCases.getDefaultHome()
-                    await send(.internal(.currentHomeLoaded(defaultHome)))
-                    
-                    // Load existing passwords for the current home only
-                    if let currentHomeId = defaultHome?.id {
-                        let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
+            state.isPermissionDenied = false
+
+            return .merge(
+                .run { send in
+                    do {
+                        print("📱 [HomeKitImport] onAppear - syncing HomeKit home IDs...")
+                        // Refresh homeKitUniqueIdentifier for all stored homes before loading
+                        // devices. After a reinstall the iCloud-restored UUID may no longer
+                        // match the live HMHome UUID, causing fetchDevices(forHomeId:) to
+                        // return nothing. importFromHomeKit() handles authorization and repairs
+                        // stale UUIDs via name-matching — a no-op when already in sync.
+                        _ = try await homeUseCases.importFromHomeKit()
+
+                        print("🏠 [HomeKitImport] loading default home...")
+                        let defaultHome = await homeUseCases.getDefaultHome()
+                        print("🏠 [HomeKitImport] defaultHome: \(defaultHome?.name ?? "nil"), id: \(defaultHome?.id.uuidString ?? "nil"), homeKitId: \(defaultHome?.homeKitUniqueIdentifier?.uuidString ?? "nil")")
+                        await send(.internal(.currentHomeLoaded(defaultHome)))
+
+                        print("🔑 [HomeKitImport] fetching existing passwords...")
+                        let existingPasswords = await passwordsUseCases.fetchPasswords()
+                        print("🔑 [HomeKitImport] fetched \(existingPasswords.count) passwords:")
+                        for p in existingPasswords {
+                            print("  - '\(p.name)' | homeKitUID: \(p.homeKitUniqueIdentifier?.uuidString ?? "NIL") | homeId: \(p.homeId?.uuidString ?? "nil")")
+                        }
                         await send(.internal(.existingPasswordsLoaded(existingPasswords)))
+
+                        if let homeKitHomeId = defaultHome?.homeKitUniqueIdentifier {
+                            print("📱 [HomeKitImport] fetching devices for homeKitHomeId: \(homeKitHomeId)")
+                            let devices = try await homeKitService.fetchDevices(forHomeId: homeKitHomeId)
+                            print("📱 [HomeKitImport] loaded \(devices.count) devices:")
+                            for d in devices {
+                                print("  - '\(d.name)' | uniqueIdentifier: \(d.uniqueIdentifier)")
+                            }
+                            await send(.internal(.devicesLoaded(devices)))
+                        } else {
+                            print("📱 [HomeKitImport] no homeKitHomeId - fetching ALL devices")
+                            let devices = try await homeKitService.fetchDevices()
+                            print("📱 [HomeKitImport] loaded \(devices.count) devices")
+                            await send(.internal(.devicesLoaded(devices)))
+                        }
+                    } catch HomeKitError.permissionDenied {
+                        await send(.internal(.permissionDenied))
+                    } catch {
+                        print("❌ [HomeKitImport] error: \(error)")
+                        await send(.internal(.loadingFailed(error.localizedDescription)))
                     }
-                    
-                    // Request authorization
-                    try await homeKitService.requestAuthorization()
-                    
-                    // Fetch devices for the specific home if available
-                    if let homeKitHomeId = defaultHome?.homeKitUniqueIdentifier {
-                        let devices = try await homeKitService.fetchDevices(forHomeId: homeKitHomeId)
-                        await send(.internal(.devicesLoaded(devices)))
-                    } else {
-                        // No default home or not a HomeKit home, fetch all devices
-                        let devices = try await homeKitService.fetchDevices()
-                        await send(.internal(.devicesLoaded(devices)))
+                },
+                // Re-fetch passwords when CloudKit sync merges changes into the view context.
+                // didMergeChangesObjectIDsNotification fires only on external merges
+                // (not local saves), so it's precise for the post-reinstall sync case.
+                .run { @MainActor send in
+                    let context = CoreDataStack.shared.viewContext
+                    for await _ in NotificationCenter.default.notifications(
+                        named: NSManagedObjectContext.didMergeChangesObjectIDsNotification,
+                        object: context
+                    ) {
+                        let passwords = await passwordsUseCases.fetchPasswords()
+                        await send(.internal(.existingPasswordsLoaded(passwords)))
                     }
-                } catch {
-                    await send(.internal(.loadingFailed(error.localizedDescription)))
                 }
-            }
+                .cancellable(id: "HomeKitImport.cloudKitObserver", cancelInFlight: true)
+            )
             
         case let .deviceToggled(deviceId):
             guard let device = state.devices.first(where: { $0.id == deviceId }) else {
@@ -172,9 +221,13 @@ struct HomeKitImport {
             return .none
             
         case .selectAllButtonTapped:
-            // Select all devices that don't have passwords (new devices only)
-            for device in state.devices {
-                if state.hasPassword(for: device) == nil {
+            if state.areAllSelectableDevicesSelected {
+                let withoutPassword = state.devices.filter { state.hasPassword(for: $0) == nil }
+                for device in withoutPassword {
+                    state.selectedDeviceIds.remove(device.id)
+                }
+            } else {
+                for device in state.devices where state.hasPassword(for: device) == nil {
                     state.selectedDeviceIds.insert(device.id)
                 }
             }
@@ -188,27 +241,40 @@ struct HomeKitImport {
             let selectedDevices = state.devices.filter { state.selectedDeviceIds.contains($0.id) }
             
             return .run { send in
-                // Fetch existing passwords only for the current home
-                let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
-                
+                let existingPasswords = await passwordsUseCases.fetchPasswords()
+
                 for device in selectedDevices {
-                    // Check if this device already exists in the current home (by HomeKit unique identifier)
-                    if let existingPassword = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier }) {
-                        // Update room if changed
+                    // Match by homeKitUniqueIdentifier first; HomeKit UUIDs change on reinstall so
+                    // fall back to name matching, preferring the password from the current home.
+                    let byName = existingPasswords.filter { $0.name == device.name }
+                    let matched = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
+                        ?? byName.first(where: { $0.homeId == currentHomeId })
+                        ?? byName.first
+
+                    if let existingPassword = matched {
+                        // Repair: set homeKitUniqueIdentifier if missing (legacy SwiftData passwords)
+                        var needsSave = false
+                        if existingPassword.homeKitUniqueIdentifier == nil {
+                            existingPassword.homeKitUniqueIdentifier = device.uniqueIdentifier
+                            needsSave = true
+                        }
                         if existingPassword.room != device.roomName {
                             existingPassword.room = device.roomName
-                            existingPassword.updatedAt = Date()
+                            needsSave = true
+                        }
+                        if needsSave {
                             await passwordsUseCases.updatePassword(existingPassword)
                         }
                     } else {
-                        // Create new password for this device with explicit homeId
                         @Dependency(\.databaseService.context) var getContext
                         let context = try getContext()
+                        let iconName = await classifyDeviceIcon(deviceName: device.name)
                         let password = Password(
                             context: context,
                             name: device.name,
-                            value: "", // Empty password - user needs to fill it in
+                            value: "",
                             room: device.roomName,
+                            icon: iconName,
                             homeId: currentHomeId,
                             homeKitUniqueIdentifier: device.uniqueIdentifier
                         )
@@ -226,6 +292,13 @@ struct HomeKitImport {
             
         case .retryButtonTapped:
             return .send(.view(.onAppear))
+
+        case .openSettings:
+            return .run { _ in
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    await MainActor.run { UIApplication.shared.open(url) }
+                }
+            }
         }
     }
     
@@ -240,11 +313,13 @@ struct HomeKitImport {
         case let .devicesLoaded(devices):
             state.isLoading = false
             state.devices = devices
-            // Pre-select devices that already have passwords (after devices are loaded)
-            for password in state.existingPasswords {
-                if let homeKitId = password.homeKitUniqueIdentifier,
-                   let device = devices.first(where: { $0.uniqueIdentifier == homeKitId }) {
+            print("✅ [HomeKitImport] devicesLoaded: \(devices.count) devices, existingPasswords: \(state.existingPasswords.count)")
+            for device in devices {
+                if let match = state.hasPassword(for: device) {
+                    print("  ✔ '\(device.name)' matched password '\(match.name)' (homeKitUID: \(match.homeKitUniqueIdentifier?.uuidString ?? "NIL"))")
                     state.selectedDeviceIds.insert(device.id)
+                } else {
+                    print("  ○ '\(device.name)' → no match (uid: \(device.uniqueIdentifier))")
                 }
             }
             return .none
@@ -253,16 +328,26 @@ struct HomeKitImport {
             state.isLoading = false
             state.loadingError = error
             return .none
+
+        case .permissionDenied:
+            state.isLoading = false
+            state.isPermissionDenied = true
+            return .none
             
         case let .existingPasswordsLoaded(passwords):
             state.existingPasswords = passwords
+            print("🔄 [HomeKitImport] existingPasswordsLoaded: \(passwords.count) passwords, devices in state: \(state.devices.count)")
+            for device in state.devices {
+                if let match = state.hasPassword(for: device) {
+                    print("  ✔ late-match '\(device.name)' → '\(match.name)'")
+                    state.selectedDeviceIds.insert(device.id)
+                }
+            }
             return .none
             
         case .passwordDeleted:
-            // Reload existing passwords after deletion
-            guard let currentHomeId = state.currentHomeId else { return .none }
             return .run { send in
-                let existingPasswords = await passwordsUseCases.fetchPasswordsForHome(currentHomeId)
+                let existingPasswords = await passwordsUseCases.fetchPasswords()
                 await send(.internal(.existingPasswordsLoaded(existingPasswords)))
             }
             

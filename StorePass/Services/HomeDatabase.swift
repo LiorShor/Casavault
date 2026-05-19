@@ -36,12 +36,53 @@ extension HomeDatabase: DependencyKey {
     public static let liveValue = Self(
         fetchAll: { @MainActor in
             do {
+                @Dependency(\.databaseService) var database
                 @Dependency(\.databaseService.context) var context
                 let homeContext = try context()
-                
+
                 let fetchRequest: NSFetchRequest<Home> = NSFetchRequest(entityName: "Home")
                 fetchRequest.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: true)]
-                return try homeContext.fetch(fetchRequest)
+                let homes = try homeContext.fetch(fetchRequest)
+
+                // Remove duplicates caused by CloudKit syncing previously-imported homes
+                // back after a reinstall. Homes are sorted oldest-first so we keep the oldest.
+                var toDelete: [Home] = []
+
+                // Pass 1: deduplicate by homeKitUniqueIdentifier
+                var seenKitIds = Set<UUID>()
+                for home in homes {
+                    guard let kitId = home.homeKitUniqueIdentifier else { continue }
+                    if seenKitIds.contains(kitId) {
+                        toDelete.append(home)
+                    } else {
+                        seenKitIds.insert(kitId)
+                    }
+                }
+
+                // Pass 2: deduplicate by name — prefer the entry that has a homeKitUniqueIdentifier
+                let afterPass1 = homes.filter { !toDelete.contains($0) }
+                var seenNames = [String: Home]()
+                for home in afterPass1 {
+                    let key = home.name.lowercased()
+                    if let existing = seenNames[key] {
+                        if home.homeKitUniqueIdentifier != nil && existing.homeKitUniqueIdentifier == nil {
+                            toDelete.append(existing)
+                            seenNames[key] = home
+                        } else {
+                            toDelete.append(home)
+                        }
+                    } else {
+                        seenNames[key] = home
+                    }
+                }
+
+                if !toDelete.isEmpty {
+                    toDelete.forEach { homeContext.delete($0) }
+                    try database.saveContext()
+                    return homes.filter { !toDelete.contains($0) }
+                }
+
+                return homes
             } catch {
                 return []
             }

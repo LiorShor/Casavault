@@ -9,6 +9,12 @@ import Foundation
 import HomeKit
 import Dependencies
 
+enum HomeKitError: Error, LocalizedError, Equatable {
+    case permissionDenied
+
+    var errorDescription: String? { "HomeKit access denied" }
+}
+
 /// Represents a HomeKit accessory that can be imported
 struct HomeKitDevice: Equatable, Identifiable {
     let id: UUID
@@ -16,13 +22,22 @@ struct HomeKitDevice: Equatable, Identifiable {
     let roomName: String?
     let categoryType: String
     let uniqueIdentifier: UUID
-    
+
+    init(id: UUID = UUID(), name: String, roomName: String?, categoryType: String, uniqueIdentifier: UUID) {
+        self.id = id
+        self.name = name
+        self.roomName = roomName
+        self.categoryType = categoryType
+        self.uniqueIdentifier = uniqueIdentifier
+    }
+
     init(from accessory: HMAccessory) {
-        self.id = UUID()
-        self.name = accessory.name
-        self.roomName = accessory.room?.name
-        self.categoryType = accessory.category.localizedDescription
-        self.uniqueIdentifier = accessory.uniqueIdentifier
+        self.init(
+            name: accessory.name,
+            roomName: accessory.room?.name,
+            categoryType: accessory.category.localizedDescription,
+            uniqueIdentifier: accessory.uniqueIdentifier
+        )
     }
 }
 
@@ -31,7 +46,7 @@ struct HomeKitHome: Equatable, Identifiable {
     let id: UUID
     let name: String
     let uniqueIdentifier: UUID
-    
+
     init(from home: HMHome) {
         self.id = UUID()
         self.name = home.name
@@ -43,79 +58,85 @@ struct HomeKitHome: Equatable, Identifiable {
 actor HomeKitService {
     private let homeManager = HMHomeManager()
     private var isReady = false
-    
-    /// Wait for HomeKit to be ready
-    private func waitForReady() async {
+
+    // MARK: - Private
+
+    /// Polls until HomeKit authorization is determined (up to 30 seconds).
+    private func waitForReady() async throws {
         guard !isReady else { return }
-        
-        // Wait for home manager to load homes
-        while homeManager.homes.isEmpty {
-            try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+
+        for _ in 0..<300 {
+            let status = homeManager.authorizationStatus
+            if status.contains(.determined) {
+                guard status.contains(.authorized) else {
+                    throw HomeKitError.permissionDenied
+                }
+                isReady = true
+                return
+            }
+            try? await Task.sleep(nanoseconds: 100_000_000)
         }
-        
+
+        let status = homeManager.authorizationStatus
+        if status.contains(.determined) && !status.contains(.authorized) {
+            throw HomeKitError.permissionDenied
+        }
         isReady = true
     }
-    
-    /// Request HomeKit authorization
-    func requestAuthorization() async throws {
-        // HomeKit authorization is automatic when capability is enabled
-        // Just wait for the home manager to be ready
-        await waitForReady()
-    }
-    
-    /// Fetch all HomeKit accessories from all homes
-    func fetchDevices() async throws -> [HomeKitDevice] {
-        await waitForReady()
-        
-        var devices: [HomeKitDevice] = []
-        
-        for home in homeManager.homes {
-            for accessory in home.accessories {
-                let device = HomeKitDevice(from: accessory)
-                devices.append(device)
+
+    /// After authorization, homeManager.homes loads asynchronously.
+    /// This polls until the home with the given UUID appears (up to 10 seconds).
+    private func waitForHome(withId homeId: UUID) async -> HMHome? {
+        for _ in 0..<50 {
+            if let home = homeManager.homes.first(where: { $0.uniqueIdentifier == homeId }) {
+                return home
             }
+            try? await Task.sleep(nanoseconds: 200_000_000)
         }
-        
-        return devices
+        return nil
     }
-    
-    /// Fetch all HomeKit homes
+
+    /// Polls until at least one home is loaded (up to 10 seconds).
+    private func waitForAnyHome() async {
+        for _ in 0..<50 {
+            if !homeManager.homes.isEmpty { return }
+            try? await Task.sleep(nanoseconds: 200_000_000)
+        }
+    }
+
+    // MARK: - Public
+
+    func requestAuthorization() async throws {
+        try await waitForReady()
+    }
+
+    func fetchDevices() async throws -> [HomeKitDevice] {
+        try await waitForReady()
+        await waitForAnyHome()
+        return homeManager.homes.flatMap { home in
+            home.accessories.map { HomeKitDevice(from: $0) }
+        }
+    }
+
     func fetchHomes() async throws -> [HomeKitHome] {
-        await waitForReady()
-        
-        var homes: [HomeKitHome] = []
-        
-        for home in homeManager.homes {
-            let homeKitHome = HomeKitHome(from: home)
-            homes.append(homeKitHome)
-        }
-        
-        return homes
+        try await waitForReady()
+        await waitForAnyHome()
+        return homeManager.homes.map { HomeKitHome(from: $0) }
     }
-    
-    /// Fetch all HomeKit accessories from a specific home
+
     func fetchDevices(forHomeId homeId: UUID) async throws -> [HomeKitDevice] {
-        await waitForReady()
-        
-        var devices: [HomeKitDevice] = []
-        
-        // Find the home with the matching uniqueIdentifier
-        guard let home = homeManager.homes.first(where: { $0.uniqueIdentifier == homeId }) else {
+        try await waitForReady()
+
+        guard let home = await waitForHome(withId: homeId) else {
+            let available = homeManager.homes.map { "\($0.name) (\($0.uniqueIdentifier))" }
+            print("⚠️ [HomeKitService] home \(homeId) not found. Available: \(available)")
             return []
         }
-        
-        for accessory in home.accessories {
-            let device = HomeKitDevice(from: accessory)
-            devices.append(device)
-        }
-        
-        return devices
+
+        return home.accessories.map { HomeKitDevice(from: $0) }
     }
-    
-    /// Check if HomeKit is available on this device
-    func isHomeKitAvailable() -> Bool {
-        return true // HomeKit is available on all iOS devices
-    }
+
+    func isHomeKitAvailable() -> Bool { true }
 }
 
 // MARK: - Dependency

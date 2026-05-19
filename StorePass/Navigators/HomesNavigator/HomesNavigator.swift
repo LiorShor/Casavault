@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 import ComposableArchitecture
 
 @MainActor
@@ -25,6 +26,7 @@ struct HomesNavigator {
         case homesCollection(HomesCollection.Action)
         case settings(PresentationAction<Settings.Action>)
         case onAppear
+        case cloudKitRemoteChange
     }
     
     init() {}
@@ -35,6 +37,22 @@ struct HomesNavigator {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                return .merge(
+                    .run { @MainActor send in
+                        let homes = await homeUseCases.fetchHomes()
+                        send(.homesCollection(.homesLoaded(homes)))
+                    },
+                    .run { send in
+                        let notifications = NotificationCenter.default.notifications(
+                            named: .NSPersistentStoreRemoteChange
+                        )
+                        for await _ in notifications {
+                            await send(.cloudKitRemoteChange)
+                        }
+                    }
+                )
+
+            case .cloudKitRemoteChange:
                 return .run { @MainActor send in
                     let homes = await homeUseCases.fetchHomes()
                     send(.homesCollection(.homesLoaded(homes)))
@@ -43,7 +61,8 @@ struct HomesNavigator {
             case .homesCollection(.navigation(.presentSettings)):
                 let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme") ?? "system"
                 let theme = AppTheme(rawValue: themeRaw) ?? .system
-                state.settings = Settings.State(selectedTheme: theme)
+                let accentColorName = UserDefaults.standard.string(forKey: "accentColorName") ?? "AppBlue"
+                state.settings = Settings.State(selectedTheme: theme, accentColorName: accentColorName)
                 return .none
                 
             case .settings(.dismiss):

@@ -25,6 +25,7 @@ extension HomesCollection {
                         ForEach(store.homes) { home in
                             HomeRow(
                                 home: home,
+                                isDefault: home.id == store.defaultHomeId,
                                 onToggleDefault: {
                                     store.send(.view(.toggleDefaultHome(home)))
                                 }
@@ -36,21 +37,7 @@ extension HomesCollection {
                                     Label(.localized(.delete), systemImage: "trash")
                                 }
                             }
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button {
-                                    store.send(.view(.onShareHome(home)))
-                                } label: {
-                                    Label("Share", systemImage: "person.2")
-                                }
-                                .tint(.blue)
-                            }
                             .contextMenu {
-                                Button {
-                                    store.send(.view(.onShareHome(home)))
-                                } label: {
-                                    Label("Share Home", systemImage: "square.and.arrow.up")
-                                }
-                                
                                 Button(role: .destructive) {
                                     store.send(.view(.onDeleteHome(home)))
                                 } label: {
@@ -108,18 +95,19 @@ extension HomesCollection {
                 .sheet(isPresented: $store.isAddingNewHome) {
                     AddHomeSheet(store: store)
                 }
-                .sheet(item: Binding(
-                    get: { store.sharingHome },
-                    set: { newValue in
-                        if newValue == nil {
-                            store.send(.binding(.set(\.sharingHome, nil)))
+                .alert(
+                    .localized(.homeKitPermissionDenied),
+                    isPresented: $store.showPermissionDeniedAlert,
+                    actions: {
+                        Button(.localized(.openSettings)) {
+                            store.send(.view(.openSettings))
                         }
+                        Button(.localized(.cancel), role: .cancel) {}
+                    },
+                    message: {
+                        Text(.localized(.homeKitPermissionDeniedDescription))
                     }
-                )) { home in
-                    CloudSharingView(home: home)
-                        .presentationDetents([.large])
-                        .presentationDragIndicator(.visible)
-                }
+                )
             }
         }
     }
@@ -127,33 +115,33 @@ extension HomesCollection {
 
 struct HomeRow: View {
     let home: Home
+    let isDefault: Bool
     let onToggleDefault: () -> Void
-    
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(home.name)
-                    .font(.headline)
-                
-                if home.homeKitUniqueIdentifier != nil {
-                    Label(.localized(.fromHomeKit), systemImage: "house.fill")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+        Button(action: onToggleDefault) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(home.name)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+
+                    if home.homeKitUniqueIdentifier != nil {
+                        Label(.localized(.fromHomeKit), systemImage: "house.fill")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-            }
-            
-            Spacer()
-            
-            Button {
-                onToggleDefault()
-            } label: {
-                Image(systemName: home.isDefault ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(home.isDefault ? .green : .secondary)
+
+                Spacer()
+
+                Image(systemName: isDefault ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isDefault ? .green : .secondary)
                     .imageScale(.large)
             }
-            .buttonStyle(.plain)
+            .contentShape(Rectangle())
         }
-        .contentShape(Rectangle())
+        .buttonStyle(.plain)
     }
 }
 
@@ -163,11 +151,10 @@ struct HomeRow: View {
     let home2 = Home(context: context, name: "Office", isDefault: false)
     let home3 = Home(context: context, name: "Vacation Home", isDefault: false, homeKitUniqueIdentifier: UUID())
     
+    let state = HomesCollection.State(homes: [home1, home2, home3])
     return HomesCollection.ContentView(
         store: Store(
-            initialState: HomesCollection.State(
-                homes: [home1, home2, home3]
-            ),
+            initialState: state,
             reducer: HomesCollection.init
         )
     )
@@ -183,9 +170,9 @@ struct AddHomeSheet: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accentColor)
                     .padding(.top, 40)
-                
+
                 Text(.localized(.addNewHome))
                     .font(.title)
                     .fontWeight(.semibold)
@@ -200,7 +187,7 @@ struct AddHomeSheet: View {
                     .background(Color.secondary.opacity(0.1))
                     .font(.largeTitle)
                     .multilineTextAlignment(.center)
-                    .clipShape(Capsule())
+                    .clipShape(.capsule)
                     .focused($isTextFieldFocused)
                     .overlay(alignment: .trailing) {
                         if !store.newHomeName.isEmpty {
@@ -229,7 +216,7 @@ struct AddHomeSheet: View {
                     Button {
                         store.send(.view(.cancelAddingHome))
                     } label: {
-                        Image(systemName: "xmark")
+                        Label(.localized(.closeButton), systemImage: "xmark")
                     }
                 }
             }

@@ -16,15 +16,14 @@ struct HomeUseCases {
     var updateHome: (Home) async -> Void
     var getDefaultHome: () async -> Home?
     var setDefaultHome: (Home) async -> Void
-    var importFromHomeKit: () async -> [Home]
+    var importFromHomeKit: () async throws -> [Home]
 }
 
 extension HomeUseCases: DependencyKey {
     static let liveValue = HomeUseCases(
         fetchHomes: {
             @Dependency(\.homeDatabase) var db
-            do { return try db.fetchAll() }
-            catch { return [] }
+            return (try? await MainActor.run { try db.fetchAll() }) ?? []
         },
         addHome: { home in
             @Dependency(\.homeDatabase) var db
@@ -64,26 +63,35 @@ extension HomeUseCases: DependencyKey {
         importFromHomeKit: {
             @Dependency(\.homeKitService) var homeKitService
             @Dependency(\.homeDatabase) var db
-            
+
             do {
-                // Request authorization first
+                // HomeKit operations run on background thread
                 try await homeKitService.requestAuthorization()
-                
-                // Fetch HomeKit homes
                 let homeKitHomes = try await homeKitService.fetchHomes()
-                
-                // Get existing homes to avoid duplicates
-                let existingHomes = try db.fetchAll()
-                let existingHomeKitIds = Set(existingHomes.compactMap { $0.homeKitUniqueIdentifier })
-                
-                // Get the context for creating new homes
-                @Dependency(\.databaseService.context) var getContext
-                let context = try getContext()
-                
-                // Create Home objects from HomeKit homes that don't exist yet
-                var newHomes: [Home] = []
-                for homeKitHome in homeKitHomes {
-                    if !existingHomeKitIds.contains(homeKitHome.uniqueIdentifier) {
+
+                // All Core Data operations must run on the main actor (viewContext is main-thread only)
+                return try await MainActor.run {
+                    let existingHomes = try db.fetchAll()
+                    let existingHomeKitIds = Set(existingHomes.compactMap { $0.homeKitUniqueIdentifier })
+
+                    @Dependency(\.databaseService.context) var getContext
+                    let context = try getContext()
+
+                    var newHomes: [Home] = []
+                    for homeKitHome in homeKitHomes {
+                        if existingHomeKitIds.contains(homeKitHome.uniqueIdentifier) {
+                            continue
+                        }
+                        // Update any home with matching name (with or without a homeKitId).
+                        // This handles reinstalls and cross-iCloud-account scenarios where the
+                        // stored UUID no longer matches the current HomeKit home's UUID.
+                        if let existingHome = existingHomes.first(where: {
+                            $0.name.lowercased() == homeKitHome.name.lowercased()
+                        }) {
+                            existingHome.homeKitUniqueIdentifier = homeKitHome.uniqueIdentifier
+                            try db.update(existingHome)
+                            continue
+                        }
                         let home = Home(
                             context: context,
                             name: homeKitHome.name,
@@ -92,9 +100,10 @@ extension HomeUseCases: DependencyKey {
                         try db.add(home)
                         newHomes.append(home)
                     }
+                    return newHomes
                 }
-                
-                return newHomes
+            } catch HomeKitError.permissionDenied {
+                throw HomeKitError.permissionDenied
             } catch {
                 return []
             }
