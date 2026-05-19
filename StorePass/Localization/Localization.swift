@@ -47,6 +47,9 @@ public enum Localization {
     case importButton
     case loadingHomeKitDevices
     case homeKitLoadError
+    case homeKitPermissionDenied
+    case homeKitPermissionDeniedDescription
+    case openSettings
     case retry
     case selectDevicesToImport
     case homeKitImportFooter
@@ -80,6 +83,7 @@ public enum Localization {
     case noHomesYet
     case noHomesYetMessage
     case icon
+    case noIcon
     case selectIcon
     case appName
     case searchPasswords
@@ -90,6 +94,7 @@ public enum Localization {
     case noAttachments
     case takePhoto
     case chooseFromLibrary
+    case accentColor
     case rateApp
     case support
     case deleteDevice
@@ -99,8 +104,17 @@ public enum Localization {
     case addNewDevice
     case importFromSmartHome
     case deleteDeviceConfirmation
+    case scanQRCode
+    case options
     case selectAll
     case deselectAll
+    case security
+    case biometricLock
+    case biometricLockFaceID
+    case biometricLockTouchID
+    case biometricLockDescription
+    case biometricLockReason
+    case unlock
 }
 
 public extension String {
