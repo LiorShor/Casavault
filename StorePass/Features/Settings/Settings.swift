@@ -53,11 +53,15 @@ struct Settings {
     @ObservableState
     struct State: Equatable {
         var selectedTheme: AppTheme
+        var accentColorName: String
+        var isBiometricLockEnabled: Bool
         var isExportingPasswords: Bool = false
         @Presents var shareSheet: ShareSheetState?
-        
-        init(selectedTheme: AppTheme = .system) {
+
+        init(selectedTheme: AppTheme = .system, accentColorName: String = "AppBlue") {
             self.selectedTheme = selectedTheme
+            self.accentColorName = accentColorName
+            self.isBiometricLockEnabled = UserDefaults.standard.bool(forKey: "isBiometricLockEnabled")
         }
     }
     
@@ -71,6 +75,8 @@ struct Settings {
         enum View: Equatable {
             case onExportButtonTapped
             case themeChanged(AppTheme)
+            case colorChanged(Color.AppColor)
+            case biometricLockToggled(Bool)
             case onOpenLanguageSettingsButtonTapped
             case onRateAppButtonTapped
             case onDismiss
@@ -116,7 +122,17 @@ struct Settings {
             state.selectedTheme = theme
             UserDefaults.standard.set(theme.rawValue, forKey: "selectedTheme")
             return .none
-            
+
+        case let .colorChanged(appColor):
+            state.accentColorName = appColor.rawValue
+            UserDefaults.standard.set(appColor.rawValue, forKey: "accentColorName")
+            return .none
+
+        case let .biometricLockToggled(enabled):
+            state.isBiometricLockEnabled = enabled
+            UserDefaults.standard.set(enabled, forKey: "isBiometricLockEnabled")
+            return .none
+
         case .onOpenLanguageSettingsButtonTapped:
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
                 return .none
@@ -185,7 +201,7 @@ struct Settings {
         for password in passwords {
             let name = password.name.replacingOccurrences(of: ",", with: ";")
             let value = password.value.replacingOccurrences(of: ",", with: ";")
-            let createdAt = dateFormatter.string(from: password.createdAt)
+            let createdAt = dateFormatter.string(from: password.createdAt ?? Date())
             let updatedAt = password.updatedAt != nil ? dateFormatter.string(from: password.updatedAt!) : ""
             
             csvString += "\(name),\(value),\(createdAt),\(updatedAt)\n"

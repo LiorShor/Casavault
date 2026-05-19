@@ -12,7 +12,13 @@ import ComposableArchitecture
 struct StorePassApp: App {
     @AppStorage("selectedTheme") private var selectedTheme = "system"
     @AppStorage("selectedLanguage") private var selectedLanguage = "en"
-    
+    @AppStorage("accentColorName") private var accentColorName = Color.AppColor.blue.rawValue
+
+    let store = Store(
+        initialState: RootNavigator.State(),
+        reducer: RootNavigator.init
+    )
+
     private var colorScheme: ColorScheme? {
         switch selectedTheme {
         case "light": return .light
@@ -20,17 +26,13 @@ struct StorePassApp: App {
         default: return nil
         }
     }
-    
+
     var body: some Scene {
         WindowGroup {
-            RootNavigator.ContentView(
-                store: Store(
-                    initialState: RootNavigator.State(),
-                    reducer: RootNavigator.init
-                )
-            )
-            .preferredColorScheme(colorScheme)
-            .environment(\.locale, Locale(identifier: selectedLanguage))
+            RootNavigator.ContentView(store: store)
+                .preferredColorScheme(colorScheme)
+                .environment(\.locale, Locale(identifier: selectedLanguage))
+                .tint(Color.appAccentColor(named: accentColorName))
         }
     }
 }
