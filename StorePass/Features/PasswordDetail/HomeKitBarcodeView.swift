@@ -12,6 +12,8 @@ struct HomeKitBarcodeView: View {
     let code: String
     let qrCodePayload: String? // The actual scanned QR code payload
     
+    @State private var ciContext = CIContext()
+    
     private enum CodeType {
         case homeKit // 8 digits
         case matter  // 11 digits
@@ -139,7 +141,6 @@ struct HomeKitBarcodeView: View {
     }
     
     private func generateQRCode(from string: String) -> UIImage {
-        let context = CIContext()
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
         // Use high error correction for better scanning
@@ -150,7 +151,7 @@ struct HomeKitBarcodeView: View {
             let transform = CGAffineTransform(scaleX: 10, y: 10)
             let scaledImage = outputImage.transformed(by: transform)
             
-            if let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) {
+            if let cgImage = ciContext.createCGImage(scaledImage, from: scaledImage.extent) {
                 return UIImage(cgImage: cgImage)
             }
         }
@@ -184,7 +185,7 @@ struct HomeKitBarcodeView: View {
                     }
                     .padding(12)
                     .background(Color.white)
-                    .cornerRadius(12)
+                    .clipShape(.rect(cornerRadius: 12))
                 
                 // The formatted code below with icon if Matter
                 HStack(spacing: 12) {

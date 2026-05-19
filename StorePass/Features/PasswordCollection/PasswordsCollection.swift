@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 import ComposableArchitecture
 import SwiftData
 import SwiftUI
@@ -118,8 +119,9 @@ struct PasswordsCollection {
         case itemsLoaded([Password])
         case defaultHomeLoaded(Home?)
         case homesLoaded([Home])
+        case remoteStoreChanged
     }
-    
+
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
@@ -152,6 +154,21 @@ struct PasswordsCollection {
             case let .homesLoaded(homes):
                 state.availableHomes = homes
                 return .none
+
+            case .remoteStoreChanged:
+                let currentHomeId = state.currentHomeId
+                return .run { @MainActor send in
+                    let homes = await homeUseCases.fetchHomes()
+                    send(.homesLoaded(homes))
+
+                    if let homeId = currentHomeId {
+                        let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
+                        send(.itemsLoaded(passwords))
+                    } else {
+                        let defaultHome = await homeUseCases.getDefaultHome()
+                        send(.defaultHomeLoaded(defaultHome))
+                    }
+                }
             }
         }
     }
@@ -160,14 +177,21 @@ struct PasswordsCollection {
     private func reduceViewAction(_ state: inout State, _ action: Action.View) -> Effect<Action> {
         switch action {
         case .onAppear:
-            // Load available homes and default home
-            return .run { @MainActor send in
-                let homes = await homeUseCases.fetchHomes()
-                send(.homesLoaded(homes))
-                
-                let defaultHome = await homeUseCases.getDefaultHome()
-                send(.defaultHomeLoaded(defaultHome))
-            }
+            return .merge(
+                .run { @MainActor send in
+                    let homes = await homeUseCases.fetchHomes()
+                    send(.homesLoaded(homes))
+
+                    let defaultHome = await homeUseCases.getDefaultHome()
+                    send(.defaultHomeLoaded(defaultHome))
+                },
+                .run { send in
+                    for await _ in NotificationCenter.default.notifications(named: .NSPersistentStoreRemoteChange) {
+                        await send(.remoteStoreChanged)
+                    }
+                }
+                .cancellable(id: "PasswordsCollection.remoteChanges", cancelInFlight: true)
+            )
             
         case let .homeSelected(homeId):
             state.currentHomeId = homeId

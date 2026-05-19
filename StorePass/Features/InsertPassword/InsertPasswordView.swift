@@ -18,7 +18,7 @@ struct InsertPasswordView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 Image(systemName: "key.horizontal.fill")
                     .resizable()
@@ -35,12 +35,17 @@ struct InsertPasswordView: View {
                         store.send(.onInputChange(newValue))
                         inputText = store.code
                     }
+                    .onChange(of: store.code) { _, newCode in
+                        if inputText != newCode {
+                            inputText = newCode
+                        }
+                    }
                     .padding()
                     .background(Color.secondary.opacity(0.1))
                     .font(.largeTitle)
                     .multilineTextAlignment(.center)
                     .keyboardType(.numberPad)
-                    .clipShape(Capsule())
+                    .clipShape(.capsule)
                     .focused($isFocused)
                     .overlay(alignment: .trailing) {
                         if !store.code.isEmpty {
@@ -67,7 +72,7 @@ struct InsertPasswordView: View {
                 Button {
                     store.send(.scanQRCode)
                 } label: {
-                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                    Label(.localized(.scanQRCode), systemImage: "qrcode.viewfinder")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
@@ -80,7 +85,7 @@ struct InsertPasswordView: View {
                     .font(.largeTitle)
                     .multilineTextAlignment(.center)
                     .keyboardType(.default)
-                    .clipShape(Capsule())
+                    .clipShape(.capsule)
                     .focused($isFocused)
                     .overlay(alignment: .leading) {
                         if !store.deviceName.isEmpty {
@@ -123,13 +128,14 @@ struct InsertPasswordView: View {
                 } label: {
                     HStack {
                         Text(store.selectedRoom ?? String.localized(.selectRoom))
-                            .foregroundColor(store.selectedRoom == nil ? .secondary : .primary)
+                            .foregroundStyle(store.selectedRoom == nil ? .secondary : .primary)
                         Spacer()
                         Image(systemName: "chevron.down")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .pickerStyle(.menu)
+                .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color.secondary.opacity(0.1))
                 .clipShape(Capsule())
@@ -146,10 +152,10 @@ struct InsertPasswordView: View {
                         ForEach(store.availableIcons, id: \.self) { icon in
                             Button {
                                 store.send(.iconSelected(icon))
-                            } label: {
+                            } label: { 
                                 Image(systemName: icon)
                                     .font(.title)
-                                    .foregroundColor(.blue)
+                                    .foregroundStyle(Color.accentColor)
                                     .frame(width: 44, height: 44)
                                     .background(
                                         store.selectedIcon == icon 
@@ -176,10 +182,8 @@ struct InsertPasswordView: View {
             .padding(.horizontal, 25)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+                    Button(.localized(.closeButton), systemImage: "xmark") {
                         store.send(.onCancelButtonTapped)
-                    } label: {
-                        Label(.localized(.closeButton), systemImage: "xmark")
                     }
                 }
             }
@@ -207,9 +211,9 @@ struct InsertPasswordAddRoomSheet: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accentColor)
                     .padding(.top, 40)
-                
+
                 Text(.localized(.addNewRoom))
                     .font(.title)
                     .fontWeight(.semibold)
@@ -217,7 +221,7 @@ struct InsertPasswordAddRoomSheet: View {
                 TextField(.localized(.roomName), text: $store.newRoomName)
                     .padding()
                     .background(Color.secondary.opacity(0.1))
-                    .clipShape(Capsule())
+                    .clipShape(.capsule)
                     .font(.largeTitle)
                     .focused($isTextFieldFocused)
                     .padding(.horizontal, 40)
@@ -250,10 +254,8 @@ struct InsertPasswordAddRoomSheet: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+                    Button(.localized(.closeButton), systemImage: "xmark") {
                         store.send(.cancelAddingRoom)
-                    } label: {
-                        Image(systemName: "xmark")
                     }
                 }
             }

@@ -22,7 +22,7 @@ struct ImageSourcePickerSheet: View {
                 HStack(spacing: 16) {
                     Image(systemName: "camera.fill")
                         .font(.title2)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.accentColor)
                         .frame(width: 32)
                     
                     Text(.localized(.takePhoto))
@@ -47,7 +47,7 @@ struct ImageSourcePickerSheet: View {
                 HStack(spacing: 16) {
                     Image(systemName: "photo.on.rectangle")
                         .font(.title2)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.accentColor)
                         .frame(width: 32)
                     
                     Text(.localized(.chooseFromLibrary))

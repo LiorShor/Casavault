@@ -32,6 +32,7 @@ struct InsertPassword {
                 "lightbulb.fill",
                 "lock.fill",
                 "fan.fill",
+                "air.conditioner.horizontal.fill",
                 "thermometer.medium",
                 "speaker.wave.2.fill",
                 "camera.fill",
@@ -41,7 +42,10 @@ struct InsertPassword {
                 "sensor.fill",
                 "window.ceiling.closed",
                 "air.purifier.fill",
-                "humidifier.fill"
+                "humidifier.fill",
+                "door.garage.closed",
+                "bell.fill",
+                "heater.vertical.fill"
             ]
         }
         
@@ -193,9 +197,8 @@ struct InsertPassword {
                 return .none
                 
             case let .qrCodeScanned(payload):
-                // Store the scanned QR code as the password value
-                state.code = payload
-                return .none
+                let digits = String.parseQRCode(payload)
+                return .send(.onInputChange(digits))
             case .onClearCodeButtonTapped:
                 state.code = .empty
                 return .none

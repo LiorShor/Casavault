@@ -25,8 +25,32 @@ struct PasswordDetail {
         var editedValue: String
         var editedRoom: String?
         var editedNotes: String
+        var editedIcon: String?
         var availableRooms: [String] = []
+
+        var availableIcons: [String] {
+            [
+                "lightbulb.fill",
+                "lock.fill",
+                "fan.fill",
+                "air.conditioner.horizontal.fill",
+                "thermometer.medium",
+                "speaker.wave.2.fill",
+                "camera.fill",
+                "tv.fill",
+                "poweroutlet.type.h.square.fill",
+                "switch.2",
+                "sensor.fill",
+                "window.ceiling.closed",
+                "air.purifier.fill",
+                "humidifier.fill",
+                "door.garage.closed",
+                "bell.fill",
+                "heater.vertical.fill"
+            ]
+        }
         var isSaving: Bool = false
+        var isDeleting: Bool = false
         
         @Presents var addRoomSheet: AddRoomSheet.State?
         @Presents var imageViewer: ImageViewer.State?
@@ -34,6 +58,7 @@ struct PasswordDetail {
         var showingImageSourcePicker: Bool = false
         var pendingImageSourceType: UIImagePickerController.SourceType = .photoLibrary
         var showingImagePicker: Bool = false
+        var attachmentsVersion: Int = 0
         
         // Validation
         var isValidPassword: Bool {
@@ -53,6 +78,7 @@ struct PasswordDetail {
             self.editedValue = password.value
             self.editedRoom = password.room
             self.editedNotes = password.notes ?? ""
+            self.editedIcon = password.icon
         }
     }
     
@@ -78,6 +104,7 @@ struct PasswordDetail {
             case imageSourcePickerCancelled
             case imagePickerDismissed
             case imageSelected(Data)
+            case iconChanged(String?)
             case scanQRCode
             case qrCodeScanned(String)
         }
@@ -151,8 +178,9 @@ struct PasswordDetail {
             state.editedValue = state.password.value
             state.editedRoom = state.password.room
             state.editedNotes = state.password.notes ?? ""
+            state.editedIcon = state.password.icon
             return .none
-            
+
         case .onSaveButtonTapped:
             // Validate before saving
             guard state.canSave else {
@@ -164,6 +192,7 @@ struct PasswordDetail {
             state.password.value = state.editedValue
             state.password.room = state.editedRoom
             state.password.notes = state.editedNotes.isEmpty ? nil : state.editedNotes
+            state.password.icon = state.editedIcon
             state.password.updatedAt = Date()
             
             let updatedPassword = state.password
@@ -174,6 +203,7 @@ struct PasswordDetail {
             }
             
         case .onDeleteButtonTapped:
+            state.isDeleting = true
             let passwordToDelete = state.password
             return .run { send in
                 await passwordsUsecase.removePassword(passwordToDelete)
@@ -196,6 +226,10 @@ struct PasswordDetail {
         case let .notesChanged(notes):
             state.editedNotes = notes
             return .none
+
+        case let .iconChanged(icon):
+            state.editedIcon = icon
+            return .none
             
         case .addAttachmentTapped:
             state.showingImageSourcePicker = true
@@ -216,6 +250,7 @@ struct PasswordDetail {
             if let attachments = state.password.attachments {
                 state.password.attachments = attachments.filter { $0.id != attachment.id }
             }
+            state.attachmentsVersion += 1
             return .none
             
         case let .viewAttachment(attachment):
@@ -252,12 +287,13 @@ struct PasswordDetail {
                 let context = try getContext()
                 let attachment = PasswordAttachment(context: context, imageData: imageData)
                 attachment.password = state.password
-                
+
                 // In Core Data, attachments is a Set, not an Array
                 if state.password.attachments == nil {
                     state.password.attachments = []
                 }
                 state.password.attachments?.insert(attachment)
+                state.attachmentsVersion += 1
                 state.showingImagePicker = false
             } catch {
                 state.showingImagePicker = false

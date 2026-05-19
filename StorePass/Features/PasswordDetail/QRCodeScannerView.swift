@@ -10,8 +10,7 @@ import AVFoundation
 
 struct QRCodeScannerView: UIViewControllerRepresentable {
     @Binding var scannedCode: String?
-    @Environment(\.dismiss) var dismiss
-    
+
     func makeUIViewController(context: Context) -> QRScannerViewController {
         let controller = QRScannerViewController()
         controller.delegate = context.coordinator
@@ -33,7 +32,6 @@ struct QRCodeScannerView: UIViewControllerRepresentable {
         
         func didScanQRCode(_ code: String) {
             parent.scannedCode = code
-            parent.dismiss()
         }
         
         func didFailWithError(_ error: Error) {

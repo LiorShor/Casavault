@@ -12,31 +12,37 @@ struct PasswordDetailView: View {
     @Bindable var store: StoreOf<PasswordDetail>
     
     var body: some View {
-        List {
-            Group {
-                deviceNameSection
-                passwordSection
-                roomSection
+        if store.isDeleting {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            List {
+                Group {
+                    deviceNameSection
+                    iconSection
+                    passwordSection
+                    roomSection
+                }
+
+                Group {
+                    notesSection
+                    attachmentsSection
+                    qrCodeScanSection
+                }
+
+                homeKitBarcodeSection
+
+                metadataSection
+
+                deleteSection
             }
-            
-            Group {
-                notesSection
-                attachmentsSection
-                qrCodeScanSection
+            .navigationTitle(Text(.localized(.passwordDetails)))
+            .navigationBarTitleDisplayMode(.inline)
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
-            
-            homeKitBarcodeSection
-            
-            metadataSection
-            
-            deleteSection
+            .toolbar { toolbarContent }
         }
-        .navigationTitle(Text(.localized(.passwordDetails)))
-        .navigationBarTitleDisplayMode(.inline)
-        .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        }
-        .toolbar { toolbarContent }
     }
     
     @ViewBuilder
@@ -58,6 +64,54 @@ struct PasswordDetailView: View {
             }
     }
     
+    @ViewBuilder
+    private var iconSection: some View {
+        Section {
+            if store.isEditing {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 44), spacing: 8)], spacing: 8) {
+                    ForEach(store.availableIcons, id: \.self) { icon in
+                        Button {
+                            store.send(.view(.iconChanged(icon)))
+                        } label: {
+                            Image(systemName: icon)
+                                .font(.title2)
+                                .foregroundStyle(Color.accentColor)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    store.editedIcon == icon
+                                        ? Color.secondary.opacity(0.15)
+                                        : Color.secondary.opacity(0.001)
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(store.editedIcon == icon ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                                )
+                                .contentShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 4)
+            } else {
+                HStack {
+                    Text(.localized(.icon))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    if let icon = store.password.icon {
+                        Image(systemName: icon)
+                            .foregroundStyle(Color.accentColor)
+                    } else {
+                        Text(.localized(.noIcon))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            }
+        } header: {
+            Text(.localized(.icon))
+        }
+    }
+
     @ViewBuilder
     private var passwordSection: some View {
         Section {
@@ -234,12 +288,14 @@ struct PasswordDetailView: View {
     @ViewBuilder
     private var metadataSection: some View {
         Section {
-                HStack {
-                    Text(.localized(.created))
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(store.password.createdAt, style: .date)
-                        .foregroundStyle(.secondary)
+                if let createdAt = store.password.createdAt {
+                    HStack {
+                        Text(.localized(.created))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(createdAt, style: .date)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 
                 if let updatedAt = store.password.updatedAt {
@@ -266,8 +322,7 @@ struct PasswordDetailView: View {
                     if store.isSaving {
                         ProgressView()
                     } else {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.blue)
+                        Label(.localized(.save), systemImage: "checkmark")
                     }
                 }
                 .disabled(!store.canSave || store.isSaving)
@@ -277,7 +332,7 @@ struct PasswordDetailView: View {
                 Button {
                     store.send(.view(.onCancelButtonTapped))
                 } label: {
-                    Image(systemName: "xmark")
+                    Label(.localized(.cancel), systemImage: "xmark")
                 }
             }
         } else {
@@ -298,10 +353,10 @@ struct PasswordDetailView: View {
                 Button {
                     store.send(.view(.scanQRCode))
                 } label: {
-                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                    Label(.localized(.scanQRCode), systemImage: "qrcode.viewfinder")
                 }
             } header: {
-                Text("Setup Code")
+                Text(.localized(.setupCode))
             }
         }
     }

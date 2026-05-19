@@ -68,7 +68,8 @@ struct SplashView: View {
                 meshAnimationPhase2.toggle()
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            Task {
+                try? await Task.sleep(for: .seconds(5))
                 send(.onAppear)
             }
         }

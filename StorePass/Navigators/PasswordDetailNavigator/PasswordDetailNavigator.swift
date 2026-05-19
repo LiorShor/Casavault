@@ -177,12 +177,15 @@ struct PasswordDetailNavigator {
                 let context = try getContext()
                 let attachment = PasswordAttachment(context: context, imageData: imageData)
                 attachment.password = state.passwordDetail.password
-                
+
                 // In Core Data, we need to insert to a set
                 if state.passwordDetail.password.attachments == nil {
                     state.passwordDetail.password.attachments = []
                 }
                 state.passwordDetail.password.attachments?.insert(attachment)
+                // Password is an NSManagedObject (reference type), so TCA won't detect
+                // the mutation via Equatable. Bumping this counter signals a real change.
+                state.passwordDetail.attachmentsVersion += 1
                 state.showingImagePicker = false
             } catch {
                 // Handle error
@@ -195,8 +198,18 @@ struct PasswordDetailNavigator {
             return .none
             
         case let .qrCodeScanned(payload):
-            // Store the scanned QR code as the password value
-            state.passwordDetail.password.value = payload
+            let digits = String.parseQRCode(payload)
+            let limitedDigits = String(digits.prefix(11))
+            var formatted = ""
+            for (index, char) in limitedDigits.enumerated() {
+                if limitedDigits.count <= 8 {
+                    if index == 3 || index == 5 { formatted += "-" }
+                } else {
+                    if index == 4 || index == 7 { formatted += "-" }
+                }
+                formatted.append(char)
+            }
+            state.passwordDetail.editedValue = formatted
             state.showingQRScanner = false
             return .none
         }

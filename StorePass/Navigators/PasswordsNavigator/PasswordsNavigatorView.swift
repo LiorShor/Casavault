@@ -16,11 +16,11 @@ struct QRScannerSheetForInsert: View {
     var body: some View {
         NavigationStack {
             QRCodeScannerView(scannedCode: $scannedCode)
-                .navigationTitle("Scan QR Code")
+                .navigationTitle(.localized(.scanQRCode))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
+                        Button(.localized(.cancel)) {
                             dismiss()
                         }
                     }

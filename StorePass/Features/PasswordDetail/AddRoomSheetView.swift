@@ -19,7 +19,7 @@ struct AddRoomSheetView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 80, height: 80)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(Color.accentColor)
                     .padding(.top, 40)
                 
                 Text(.localized(.addNewRoom))

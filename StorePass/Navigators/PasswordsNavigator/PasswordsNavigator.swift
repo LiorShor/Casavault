@@ -97,10 +97,10 @@ struct PasswordsNavigator {
                 state.showingQRScannerForInsert = false
                 return .send(.insertPassword(.presented(.qrCodeScanned(payload))))
             case .passwordsCollection(.navigation(.presentSettings)):
-                // Load saved preferences
                 let themeRaw = UserDefaults.standard.string(forKey: "selectedTheme") ?? "system"
                 let theme = AppTheme(rawValue: themeRaw) ?? .system
-                state.settings = Settings.State(selectedTheme: theme)
+                let accentColorName = UserDefaults.standard.string(forKey: "accentColorName") ?? "AppBlue"
+                state.settings = Settings.State(selectedTheme: theme, accentColorName: accentColorName)
                 return .none
             case let .passwordsCollection(.navigation(.presentPassword(password))):
                 state.passwordDetailNavigator = PasswordDetailNavigator.State(password: password)

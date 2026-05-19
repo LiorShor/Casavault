@@ -9,16 +9,19 @@ import SwiftUI
 import SwiftData
 import ComposableArchitecture
 import UniformTypeIdentifiers
+import CoreData
 
 
 struct PasswordsCollectionView: View {
-    
+
     let store: StoreOf<PasswordsCollection>
+    @State private var coreDataSaveCount = 0
+
     init(store: StoreOf<PasswordsCollection>) {
         self.store = store
     }
 
-    
+
     var body: some View {
         Group {
             if store.hasNoHome {
@@ -27,6 +30,18 @@ struct PasswordsCollectionView: View {
                 listView
             } else {
                 gridView
+            }
+        }
+        .id(coreDataSaveCount)
+        .onReceive(NotificationCenter.default.publisher(for: NSManagedObjectContext.didSaveObjectsNotification)) { notification in
+            // Only refresh on insert/update — not on delete.
+            // Deleted NSManagedObjects become faults after save; accessing .id on them crashes.
+            // Deletion is handled by PasswordsNavigator reloading state on dismiss.
+            let hasInsertedOrUpdated = [NSUpdatedObjectsKey, NSInsertedObjectsKey].contains { key in
+                (notification.userInfo?[key] as? Set<NSManagedObject>)?.contains { $0 is Password } == true
+            }
+            if hasInsertedOrUpdated {
+                coreDataSaveCount += 1
             }
         }
         .searchable(
@@ -103,7 +118,7 @@ struct PasswordsCollectionView: View {
                         )
                     }
                 } label: {
-                    Image(systemName: "ellipsis")
+                    Label(.localized(.options), systemImage: "ellipsis")
                 }
             }
             
@@ -205,9 +220,8 @@ struct PasswordsCollectionView: View {
                             Text(roomName)
                                 .font(.headline)
                                 .padding(.horizontal)
+                                .glassEffect()
                                 .padding(.top, 8)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(UIColor.systemBackground))
                         }
                     }
                 }
@@ -243,7 +257,7 @@ struct PasswordListRow: View {
                 if let icon = password.icon {
                     Image(systemName: icon)
                         .font(.title2)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(Color.accentColor)
                         .frame(width: 32)
                 }
                 
@@ -288,7 +302,7 @@ struct PasswordGridCard: View {
                 VStack(spacing: 8) {
                     ZStack(alignment: .topTrailing) {
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(UIColor.secondarySystemBackground))
+                            .fill(Color(.secondarySystemGroupedBackground))
                         
                         // Warning icon overlay (only when not in edit mode)
                         if password.value.isEmpty && !isEditMode {
@@ -304,7 +318,7 @@ struct PasswordGridCard: View {
                             if let icon = password.icon {
                                 Image(systemName: icon)
                                     .font(.largeTitle)
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.accentColor)
                             }
                             Text(password.name)
                                 .font(.headline)
@@ -313,13 +327,18 @@ struct PasswordGridCard: View {
                         }
                         .padding(8)
                     )
-                    
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(Color.accentColor, lineWidth: 1.5)
+                    )
+
                     if let room = password.room {
                         Text(room)
-                            .font(.caption2)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
+                    Spacer()
                 }
                 
                 // Delete button in edit mode
@@ -389,7 +408,7 @@ struct PasswordDropDelegate: DropDelegate {
         itemProvider.loadItem(forTypeIdentifier: "public.text", options: nil) { data, error in
             if let data = data as? Data,
                let sourceId = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     onDrop(sourceId)
                 }
             }

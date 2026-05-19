@@ -52,10 +52,8 @@ struct ImageViewerView: View {
     
     private var closeButton: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Button(action: {
+            Button(.localized(.closeButton), systemImage: "xmark") {
                 store.send(.view(.closeTapped))
-            }) {
-                Image(systemName: "xmark")
             }
         }
     }
