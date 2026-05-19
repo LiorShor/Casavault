@@ -28,12 +28,10 @@ class CoreDataStack {
             fatalError("Failed to retrieve a persistent store description.")
         }
         
-        // Enable CloudKit sync
         description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-            containerIdentifier: "iCloud.com.liorshor.StorePass"
+            containerIdentifier: "iCloud.com.shor.StorePass"
         )
-        
-        // Enable persistent history tracking (required for CloudKit)
+
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         
@@ -77,21 +75,21 @@ class CoreDataStack {
         entity.name = "Home"
         entity.managedObjectClassName = "Home"
         
-        // Properties
+        // Properties - ALL must be optional OR have default values for CloudKit
         let id = NSAttributeDescription()
         id.name = "id"
         id.attributeType = .UUIDAttributeType
-        id.isOptional = false
+        id.isOptional = true
         
         let name = NSAttributeDescription()
         name.name = "name"
         name.attributeType = .stringAttributeType
-        name.isOptional = false
+        name.isOptional = true
         
         let isDefault = NSAttributeDescription()
         isDefault.name = "isDefault"
         isDefault.attributeType = .booleanAttributeType
-        isDefault.isOptional = false
+        isDefault.isOptional = true
         isDefault.defaultValue = false
         
         let homeKitUniqueIdentifier = NSAttributeDescription()
@@ -102,7 +100,7 @@ class CoreDataStack {
         let createdAt = NSAttributeDescription()
         createdAt.name = "createdAt"
         createdAt.attributeType = .dateAttributeType
-        createdAt.isOptional = false
+        createdAt.isOptional = true
         
         let updatedAt = NSAttributeDescription()
         updatedAt.name = "updatedAt"
@@ -110,7 +108,7 @@ class CoreDataStack {
         updatedAt.isOptional = true
         
         entity.properties = [id, name, isDefault, homeKitUniqueIdentifier, createdAt, updatedAt]
-        
+
         return entity
     }
     
@@ -119,21 +117,21 @@ class CoreDataStack {
         entity.name = "Password"
         entity.managedObjectClassName = "Password"
         
-        // Properties
+        // Properties - ALL must be optional OR have default values for CloudKit
         let id = NSAttributeDescription()
         id.name = "id"
         id.attributeType = .UUIDAttributeType
-        id.isOptional = false
+        id.isOptional = true
         
         let name = NSAttributeDescription()
         name.name = "name"
         name.attributeType = .stringAttributeType
-        name.isOptional = false
+        name.isOptional = true
         
         let value = NSAttributeDescription()
         value.name = "value"
         value.attributeType = .stringAttributeType
-        value.isOptional = false
+        value.isOptional = true
         
         let room = NSAttributeDescription()
         room.name = "room"
@@ -163,7 +161,7 @@ class CoreDataStack {
         let createdAt = NSAttributeDescription()
         createdAt.name = "createdAt"
         createdAt.attributeType = .dateAttributeType
-        createdAt.isOptional = false
+        createdAt.isOptional = true
         
         let updatedAt = NSAttributeDescription()
         updatedAt.name = "updatedAt"
@@ -180,11 +178,11 @@ class CoreDataStack {
         entity.name = "PasswordAttachment"
         entity.managedObjectClassName = "PasswordAttachment"
         
-        // Properties
+        // Properties - ALL must be optional OR have default values for CloudKit
         let id = NSAttributeDescription()
         id.name = "id"
         id.attributeType = .UUIDAttributeType
-        id.isOptional = false
+        id.isOptional = true
         
         let imageData = NSAttributeDescription()
         imageData.name = "imageData"
@@ -195,12 +193,12 @@ class CoreDataStack {
         let fileName = NSAttributeDescription()
         fileName.name = "fileName"
         fileName.attributeType = .stringAttributeType
-        fileName.isOptional = false
+        fileName.isOptional = true
         
         let createdAt = NSAttributeDescription()
         createdAt.name = "createdAt"
         createdAt.attributeType = .dateAttributeType
-        createdAt.isOptional = false
+        createdAt.isOptional = true
         
         entity.properties = [id, imageData, fileName, createdAt]
         

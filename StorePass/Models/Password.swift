@@ -19,7 +19,7 @@ public class Password: NSManagedObject, Identifiable {
     @NSManaged public var homeId: UUID?
     @NSManaged public var homeKitUniqueIdentifier: UUID?
     @NSManaged public var notes: String?
-    @NSManaged public var createdAt: Date
+    @NSManaged public var createdAt: Date?
     @NSManaged public var updatedAt: Date?
     
     // Relationship to attachments (one-to-many)
@@ -32,6 +32,20 @@ public class Password: NSManagedObject, Identifiable {
         super.awakeFromInsert()
         setPrimitiveValue(UUID(), forKey: "id")
         setPrimitiveValue(Date(), forKey: "createdAt")
+    }
+
+    // Patch nil values on migrated records so non-optional Swift accessors don't crash
+    public override func awakeFromFetch() {
+        super.awakeFromFetch()
+        if primitiveValue(forKey: "id") == nil {
+            setPrimitiveValue(UUID(), forKey: "id")
+        }
+        if (primitiveValue(forKey: "name") as? String) == nil {
+            setPrimitiveValue("", forKey: "name")
+        }
+        if (primitiveValue(forKey: "value") as? String) == nil {
+            setPrimitiveValue("", forKey: "value")
+        }
     }
     
     convenience init(context: NSManagedObjectContext, name: String, value: String, room: String? = nil, icon: String? = nil, homeId: UUID? = nil, homeKitUniqueIdentifier: UUID? = nil, notes: String? = nil) {

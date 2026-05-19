@@ -27,6 +27,16 @@ public class Home: NSManagedObject, Identifiable {
         setPrimitiveValue(Date(), forKey: "createdAt")
         setPrimitiveValue(false, forKey: "isDefault")
     }
+
+    public override func awakeFromFetch() {
+        super.awakeFromFetch()
+        if primitiveValue(forKey: "id") == nil {
+            setPrimitiveValue(UUID(), forKey: "id")
+        }
+        if (primitiveValue(forKey: "name") as? String) == nil {
+            setPrimitiveValue("", forKey: "name")
+        }
+    }
     
     convenience init(context: NSManagedObjectContext, name: String, isDefault: Bool = false, homeKitUniqueIdentifier: UUID? = nil) {
         self.init(context: context)

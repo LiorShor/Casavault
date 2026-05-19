@@ -25,6 +25,19 @@ public class PasswordAttachment: NSManagedObject, Identifiable {
         setPrimitiveValue(Date(), forKey: "createdAt")
         setPrimitiveValue("attachment", forKey: "fileName")
     }
+
+    public override func awakeFromFetch() {
+        super.awakeFromFetch()
+        if primitiveValue(forKey: "id") == nil {
+            setPrimitiveValue(UUID(), forKey: "id")
+        }
+        if primitiveValue(forKey: "createdAt") == nil {
+            setPrimitiveValue(Date(), forKey: "createdAt")
+        }
+        if (primitiveValue(forKey: "fileName") as? String) == nil {
+            setPrimitiveValue("attachment", forKey: "fileName")
+        }
+    }
     
     convenience init(context: NSManagedObjectContext, imageData: Data?, fileName: String = "attachment") {
         self.init(context: context)
