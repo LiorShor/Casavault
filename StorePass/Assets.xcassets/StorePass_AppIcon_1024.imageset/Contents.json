@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "StorePass_AppIcon_1024.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
