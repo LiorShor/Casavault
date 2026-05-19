@@ -3,15 +3,42 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 90;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA68BA9D2FBC18A50020849F /* IssueReportingTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = BA68BA9C2FBC18A50020849F /* IssueReportingTestSupport */; };
+		BA68BA9E2FBC18B20020849F /* IssueReportingTestSupport in Embed Frameworks */ = {isa = PBXBuildFile; productRef = BA68BA9C2FBC18A50020849F /* IssueReportingTestSupport */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		BA86A00F2F194C04004BC59C /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = BA86A00E2F194C04004BC59C /* ComposableArchitecture */; };
 		BA86A0682F196151004BC59C /* Localization in Frameworks */ = {isa = PBXBuildFile; productRef = BA86A0672F196151004BC59C /* Localization */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		BA68BA8B2FBB5C390020849F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BA75DBDC2F194A7600816228 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BA75DBE32F194A7600816228;
+			remoteInfo = StorePass;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		BA68BA9F2FBC18B20020849F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				BA68BA9E2FBC18B20020849F /* IssueReportingTestSupport in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		BA68BA872FBB5C390020849F /* StorePassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StorePassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA75DBE42F194A7600816228 /* StorePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StorePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -26,6 +53,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		BA68BA882FBB5C390020849F /* StorePassTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StorePassTests;
+			sourceTree = "<group>";
+		};
 		BA75DBE62F194A7600816228 /* StorePass */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -37,20 +69,39 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		BA68BA842FBB5C390020849F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BA68BA9D2FBC18A50020849F /* IssueReportingTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BA75DBE12F194A7600816228 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 				BA86A00F2F194C04004BC59C /* ComposableArchitecture in Frameworks */,
 				BA86A0682F196151004BC59C /* Localization in Frameworks */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		BA68BA9A2FBC18670020849F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BA75DBDB2F194A7600816228 = {
 			isa = PBXGroup;
 			children = (
 				BA75DBE62F194A7600816228 /* StorePass */,
+				BA68BA882FBB5C390020849F /* StorePassTests */,
+				BA68BA9A2FBC18670020849F /* Frameworks */,
 				BA75DBE52F194A7600816228 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,6 +110,7 @@
 			isa = PBXGroup;
 			children = (
 				BA75DBE42F194A7600816228 /* StorePass.app */,
+				BA68BA872FBB5C390020849F /* StorePassTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -66,6 +118,31 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		BA68BA862FBB5C390020849F /* StorePassTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BA68BA8D2FBB5C390020849F /* Build configuration list for PBXNativeTarget "StorePassTests" */;
+			buildPhases = (
+				BA68BA832FBB5C390020849F /* Sources */,
+				BA68BA842FBB5C390020849F /* Frameworks */,
+				BA68BA852FBB5C390020849F /* Resources */,
+				BA68BA9F2FBC18B20020849F /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BA68BA8C2FBB5C390020849F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				BA68BA882FBB5C390020849F /* StorePassTests */,
+			);
+			name = StorePassTests;
+			packageProductDependencies = (
+				BA68BA9C2FBC18A50020849F /* IssueReportingTestSupport */,
+			);
+			productName = StorePassTests;
+			productReference = BA68BA872FBB5C390020849F /* StorePassTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		BA75DBE32F194A7600816228 /* StorePass */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BA75DBF22F194A7800816228 /* Build configuration list for PBXNativeTarget "StorePass" */;
@@ -75,6 +152,8 @@
 				BA75DBE22F194A7600816228 /* Resources */,
 			);
 			buildRules = (
+			);
+			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
 				BA75DBE62F194A7600816228 /* StorePass */,
@@ -95,9 +174,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2620;
+				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					BA68BA862FBB5C390020849F = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = BA75DBE32F194A7600816228;
+					};
 					BA75DBE32F194A7600816228 = {
 						CreatedOnToolsVersion = 26.2;
 						LastSwiftMigration = 2620;
@@ -117,35 +200,107 @@
 			packageReferences = (
 				BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				BA86A0662F196151004BC59C /* XCRemoteSwiftPackageReference "swift-localization" */,
+				BA68BA9B2FBC18A50020849F /* XCRemoteSwiftPackageReference "xctest-dynamic-overlay" */,
 			);
-			preferredProjectObjectVersion = 90;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = BA75DBE52F194A7600816228 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				BA75DBE32F194A7600816228 /* StorePass */,
+				BA68BA862FBB5C390020849F /* StorePassTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		BA75DBE22F194A7600816228 /* Resources */ = {
+		BA68BA852FBB5C390020849F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA75DBE22F194A7600816228 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		BA75DBE02F194A7600816228 /* Sources */ = {
+		BA68BA832FBB5C390020849F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA75DBE02F194A7600816228 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		BA68BA8C2FBB5C390020849F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BA75DBE32F194A7600816228 /* StorePass */;
+			targetProxy = BA68BA8B2FBB5C390020849F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
-		BA75DBF32F194A7800816228 /* Debug configuration for PBXNativeTarget "StorePass" */ = {
+		BA68BA8E2FBB5C390020849F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LMNQ8K7V9N;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shor.StorePassTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StorePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StorePass";
+			};
+			name = Debug;
+		};
+		BA68BA8F2FBB5C390020849F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LMNQ8K7V9N;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shor.StorePassTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StorePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/StorePass";
+			};
+			name = Release;
+		};
+		BA75DBF32F194A7800816228 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -163,6 +318,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -181,7 +337,7 @@
 			};
 			name = Debug;
 		};
-		BA75DBF42F194A7800816228 /* Release configuration for PBXNativeTarget "StorePass" */ = {
+		BA75DBF42F194A7800816228 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -199,6 +355,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -216,7 +373,7 @@
 			};
 			name = Release;
 		};
-		BA75DBF52F194A7800816228 /* Debug configuration for PBXProject "StorePass" */ = {
+		BA75DBF52F194A7800816228 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -269,7 +426,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -281,7 +438,7 @@
 			};
 			name = Debug;
 		};
-		BA75DBF62F194A7800816228 /* Release configuration for PBXProject "StorePass" */ = {
+		BA75DBF62F194A7800816228 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -328,7 +485,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -342,25 +499,44 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		BA68BA8D2FBB5C390020849F /* Build configuration list for PBXNativeTarget "StorePassTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA68BA8E2FBB5C390020849F /* Debug */,
+				BA68BA8F2FBB5C390020849F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BA75DBDF2F194A7600816228 /* Build configuration list for PBXProject "StorePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BA75DBF52F194A7800816228 /* Debug configuration for PBXProject "StorePass" */,
-				BA75DBF62F194A7800816228 /* Release configuration for PBXProject "StorePass" */,
+				BA75DBF52F194A7800816228 /* Debug */,
+				BA75DBF62F194A7800816228 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		BA75DBF22F194A7800816228 /* Build configuration list for PBXNativeTarget "StorePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BA75DBF32F194A7800816228 /* Debug configuration for PBXNativeTarget "StorePass" */,
-				BA75DBF42F194A7800816228 /* Release configuration for PBXNativeTarget "StorePass" */,
+				BA75DBF32F194A7800816228 /* Debug */,
+				BA75DBF42F194A7800816228 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		BA68BA9B2FBC18A50020849F /* XCRemoteSwiftPackageReference "xctest-dynamic-overlay" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/xctest-dynamic-overlay";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.0;
+			};
+		};
 		BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
@@ -380,6 +556,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		BA68BA9C2FBC18A50020849F /* IssueReportingTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BA68BA9B2FBC18A50020849F /* XCRemoteSwiftPackageReference "xctest-dynamic-overlay" */;
+			productName = IssueReportingTestSupport;
+		};
 		BA86A00E2F194C04004BC59C /* ComposableArchitecture */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BA86A00D2F194C04004BC59C /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
