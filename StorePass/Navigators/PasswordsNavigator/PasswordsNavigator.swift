@@ -103,7 +103,10 @@ struct PasswordsNavigator {
                 state.settings = Settings.State(selectedTheme: theme, accentColorName: accentColorName)
                 return .none
             case let .passwordsCollection(.navigation(.presentPassword(password))):
-                state.passwordDetailNavigator = PasswordDetailNavigator.State(password: password)
+                state.passwordDetailNavigator = PasswordDetailNavigator.State(
+                    password: password,
+                    pendingRoomDeletions: state.passwordsCollection.pendingRoomDeletions
+                )
                 return .none
                 
             case .passwordsCollection(.navigation(.navigateToHomes)):

@@ -36,15 +36,16 @@ struct QRScannerSheetForInsert: View {
 }
 
 extension PasswordsNavigator {
-    
+
     struct ContentView: View {
-        
+
         @Bindable var store: StoreOf<PasswordsNavigator>
-        
+        @Environment(\.colorScheme) private var colorScheme
+
         init(store: StoreOf<PasswordsNavigator>) {
             self.store = store
         }
-        
+
         var body: some View {
             NavigationStack {
                 PasswordsCollectionView(
@@ -56,9 +57,8 @@ extension PasswordsNavigator {
                 }
             }
             .sheet(item: $store.scope(state: \.settings, action: \.settings)) { settingsStore in
-                NavigationStack {
-                    SettingsView(store: settingsStore)
-                }
+                SettingsView(store: settingsStore)
+                    .preferredColorScheme(colorScheme)
             }
             .sheet(item: $store.scope(state: \.insertPassword, action: \.insertPassword)) { insertStore in
                 NavigationStack {

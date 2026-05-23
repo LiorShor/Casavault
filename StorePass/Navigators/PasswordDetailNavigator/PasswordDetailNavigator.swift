@@ -11,6 +11,8 @@ import UIKit
 
 @Reducer
 struct PasswordDetailNavigator {
+    @Dependency(\.roomIconsService) var roomIconsService
+
     @ObservableState
     struct State: Equatable {
         var passwordDetail: PasswordDetail.State
@@ -23,8 +25,9 @@ struct PasswordDetailNavigator {
         var showingImagePicker: Bool = false
         var showingQRScanner: Bool = false
         
-        init(password: Password) {
+        init(password: Password, pendingRoomDeletions: Set<String> = []) {
             self.passwordDetail = PasswordDetail.State(password: password)
+            self.passwordDetail.pendingRoomDeletions = pendingRoomDeletions
         }
     }
     
@@ -81,7 +84,7 @@ struct PasswordDetailNavigator {
             case let .view(viewAction):
                 return reduceViewAction(&state, viewAction)
                 
-            case let .delegate(delegateAction):
+            case .delegate:
                 return .none
             }
         }
@@ -137,14 +140,13 @@ struct PasswordDetailNavigator {
     
     private func reduceAddRoomSheetDelegate(_ state: inout State, _ action: AddRoomSheet.Action.Delegate) -> Effect<Action> {
         switch action {
-        case let .roomSaved(roomName):
-            // Update the password detail with the new room
+        case let .roomSaved(roomName, icon):
             state.passwordDetail.editedRoom = roomName
-            // Add to available rooms if not already there
             if !state.passwordDetail.availableRooms.contains(roomName) {
                 state.passwordDetail.availableRooms.append(roomName)
                 state.passwordDetail.availableRooms.sort()
             }
+            roomIconsService.setIcon(icon, roomName, state.passwordDetail.password.homeId)
             return .none
         }
     }
@@ -178,17 +180,13 @@ struct PasswordDetailNavigator {
                 let attachment = PasswordAttachment(context: context, imageData: imageData)
                 attachment.password = state.passwordDetail.password
 
-                // In Core Data, we need to insert to a set
                 if state.passwordDetail.password.attachments == nil {
                     state.passwordDetail.password.attachments = []
                 }
                 state.passwordDetail.password.attachments?.insert(attachment)
-                // Password is an NSManagedObject (reference type), so TCA won't detect
-                // the mutation via Equatable. Bumping this counter signals a real change.
                 state.passwordDetail.attachmentsVersion += 1
                 state.showingImagePicker = false
             } catch {
-                // Handle error
                 state.showingImagePicker = false
             }
             return .none
