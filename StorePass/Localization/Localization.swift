@@ -115,6 +115,15 @@ public enum Localization {
     case biometricLockDescription
     case biometricLockReason
     case unlock
+    case manageRooms
+    case rooms
+    case noRoomsYet
+    case noRoomsYetMessage
+    case renameRoom
+    case filterAll
+    case syncRoomsFromHomeKit
+    case syncDeviceRooms
+    case contactUs
 }
 
 public extension String {

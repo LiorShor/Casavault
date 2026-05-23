@@ -220,42 +220,6 @@
         }
       }
     },
-    "biometricLockFaceID" : {
-      "comment" : "Toggle label to enable biometric lock when device supports Face ID",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock with Face ID"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נעילה עם Face ID"
-          }
-        }
-      }
-    },
-    "biometricLockTouchID" : {
-      "comment" : "Toggle label to enable biometric lock when device supports Touch ID",
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock with Touch ID"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נעילה עם Touch ID"
-          }
-        }
-      }
-    },
     "biometricLockDescription" : {
       "comment" : "Footer text explaining the biometric lock feature",
       "extractionState" : "manual",
@@ -274,6 +238,24 @@
         }
       }
     },
+    "biometricLockFaceID" : {
+      "comment" : "Toggle label to enable biometric lock when device supports Face ID",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock with Face ID"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נעילה עם Face ID"
+          }
+        }
+      }
+    },
     "biometricLockReason" : {
       "comment" : "Reason string shown in the biometric prompt",
       "extractionState" : "manual",
@@ -288,6 +270,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "פתח את StorePass"
+          }
+        }
+      }
+    },
+    "biometricLockTouchID" : {
+      "comment" : "Toggle label to enable biometric lock when device supports Touch ID",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock with Touch ID"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נעילה עם Touch ID"
           }
         }
       }
@@ -358,6 +358,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "המשך"
+          }
+        }
+      }
+    },
+    "contactUs" : {
+      "comment" : "Button to contact the developer via email",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contact Us"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צור קשר"
           }
         }
       }
@@ -640,6 +658,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ייצוא סיסמאות"
+          }
+        }
+      }
+    },
+    "filterAll" : {
+      "comment" : "Filter chip label to show all passwords",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הכל"
           }
         }
       }
@@ -1146,6 +1182,24 @@
         }
       }
     },
+    "manageRooms" : {
+      "comment" : "Title for manage rooms screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage Rooms"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ניהול חדרים"
+          }
+        }
+      }
+    },
     "myHomes" : {
       "comment" : "Section header for user's homes",
       "extractionState" : "manual",
@@ -1344,6 +1398,42 @@
         }
       }
     },
+    "noRoomsYet" : {
+      "comment" : "Empty state title for manage rooms screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Rooms Yet"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין חדרים עדיין"
+          }
+        }
+      }
+    },
+    "noRoomsYetMessage" : {
+      "comment" : "Empty state message for manage rooms screen",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assign a room to a device to see it here"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שייך חדר למכשיר כדי לראות אותו כאן"
+          }
+        }
+      }
+    },
     "notes" : {
       "comment" : "Notes section header",
       "extractionState" : "manual",
@@ -1488,6 +1578,24 @@
         }
       }
     },
+    "renameRoom" : {
+      "comment" : "Button and title for renaming a room",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename Room"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שינוי שם חדר"
+          }
+        }
+      }
+    },
     "retry" : {
       "comment" : "Button to retry an action",
       "extractionState" : "manual",
@@ -1538,6 +1646,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "שם החדר"
+          }
+        }
+      }
+    },
+    "rooms" : {
+      "comment" : "Tab bar label for rooms tab",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rooms"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חדרים"
           }
         }
       }
@@ -1769,6 +1895,42 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "תמיכה"
+          }
+        }
+      }
+    },
+    "syncDeviceRooms" : {
+      "comment" : "Button to sync each device to its current HomeKit room",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sync Devices to Rooms"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סנכרון מכשירים לחדרים"
+          }
+        }
+      }
+    },
+    "syncRoomsFromHomeKit" : {
+      "comment" : "Button to import rooms from HomeKit",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import from HomeKit"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ייבוא מ-HomeKit"
           }
         }
       }
