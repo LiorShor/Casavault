@@ -15,6 +15,7 @@ import HomeKit
 @Reducer
 struct PasswordDetail {
     @Dependency(\.passwordsUseCases) var passwordsUsecase
+    @Dependency(\.roomIconsService) var roomIconsService
     @Dependency(\.dismiss) var dismiss
     
     @ObservableState
@@ -27,6 +28,7 @@ struct PasswordDetail {
         var editedNotes: String
         var editedIcon: String?
         var availableRooms: [String] = []
+        var pendingRoomDeletions: Set<String> = []
 
         var availableIcons: [String] {
             [
@@ -69,7 +71,7 @@ struct PasswordDetail {
         }
         
         var canSave: Bool {
-            !editedName.isEmpty && isValidPassword
+            !editedName.isEmpty
         }
         
         init(password: Password) {
@@ -156,19 +158,23 @@ struct PasswordDetail {
         switch action {
         case .onEditButtonTapped:
             state.isEditing = true
-            // Initialize available rooms with current room if it exists
-            if let currentRoom = state.password.room {
+            // If the current room was deleted, clear it from editing state
+            if let currentRoom = state.password.room, state.pendingRoomDeletions.contains(currentRoom) {
+                state.editedRoom = nil
+            }
+            // Initialize available rooms with current room if it exists and not deleted
+            if let currentRoom = state.password.room, !state.pendingRoomDeletions.contains(currentRoom) {
                 state.availableRooms = [currentRoom]
             }
             // Load available rooms only for the current home
-            return .run { [homeId = state.password.homeId] send in
+            return .run { [homeId = state.password.homeId, pendingRoomDeletions = state.pendingRoomDeletions] send in
                 let passwords: [Password]
                 if let homeId = homeId {
                     passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
                 } else {
                     passwords = await passwordsUsecase.fetchPasswords()
                 }
-                let rooms = Set(passwords.compactMap { $0.room }).sorted()
+                let rooms = Set(passwords.compactMap { $0.room }).subtracting(pendingRoomDeletions).sorted()
                 await send(.internal(.roomsLoaded(rooms)))
             }
             
@@ -330,14 +336,15 @@ struct PasswordDetail {
     
     private func reduceAddRoomSheetDelegate(_ state: inout State, _ action: AddRoomSheet.Action.Delegate) -> Effect<Action> {
         switch action {
-        case let .roomSaved(roomName):
-            // Update the password detail with the new room
+        case let .roomSaved(roomName, icon):
             state.editedRoom = roomName
-            // Add to available rooms if not already there
+            state.pendingRoomDeletions.remove(roomName)
             if !state.availableRooms.contains(roomName) {
                 state.availableRooms.append(roomName)
                 state.availableRooms.sort()
             }
+            roomIconsService.setIcon(icon, roomName, state.password.homeId)
+            roomIconsService.markRoomRestored(roomName, state.password.homeId)
             return .none
         }
     }

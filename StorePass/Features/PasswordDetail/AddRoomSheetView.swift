@@ -11,54 +11,60 @@ import ComposableArchitecture
 struct AddRoomSheetView: View {
     @Bindable var store: StoreOf<AddRoomSheet>
     @FocusState private var isTextFieldFocused: Bool
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Image(systemName: "door.left.hand.open")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80)
-                    .foregroundStyle(Color.accentColor)
-                    .padding(.top, 40)
-                
-                Text(.localized(.addNewRoom))
-                    .font(.title)
-                    .fontWeight(.semibold)
-                
-                TextField(.localized(.roomName), text: $store.roomName.sending(\.view.roomNameChanged))
-                    .padding()
-                    .background(Color.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-                    .font(.largeTitle)
-                    .focused($isTextFieldFocused)
-                    .padding(.horizontal, 40)
-                    .multilineTextAlignment(.center)
-                    .overlay(alignment: .leading) {
-                        if !store.roomName.isEmpty {
-                            Button {
-                                store.send(.view(.roomNameChanged("")))
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .padding(12)
-                                    .contentShape(Rectangle())
+            ScrollView {
+                VStack(spacing: 24) {
+                    Image(systemName: store.selectedIcon ?? "door.left.hand.open")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
+                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(.tint)
+                        .padding(.top, 40)
+                        .animation(.spring(response: 0.3), value: store.selectedIcon)
+
+                    Text(.localized(.addNewRoom))
+                        .font(.title)
+                        .fontWeight(.semibold)
+
+                    TextField(.localized(.roomName), text: $store.roomName.sending(\.view.roomNameChanged))
+                        .padding()
+                        .background(Color.secondary.opacity(0.1))
+                        .clipShape(Capsule())
+                        .font(.largeTitle)
+                        .focused($isTextFieldFocused)
+                        .padding(.horizontal, 40)
+                        .multilineTextAlignment(.center)
+                        .overlay(alignment: .leading) {
+                            if !store.roomName.isEmpty {
+                                Button {
+                                    store.send(.view(.roomNameChanged("")))
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .padding(12)
+                                        .contentShape(Rectangle())
+                                }
+                                .padding(.leading, 48)
                             }
-                            .padding(.leading, 48)
                         }
+
+                    RoomIconPickerView(selectedIcon: store.selectedIcon) { icon in
+                        store.send(.view(.iconChanged(icon)))
                     }
-                
-                Spacer()
-                
-                Button {
-                    store.send(.view(.saveTapped))
-                } label: {
-                    Text(.localized(.save))
-                        .frame(maxWidth: .infinity, minHeight: 50)
+
+                    Button {
+                        store.send(.view(.saveTapped))
+                    } label: {
+                        Text(.localized(.save))
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .disabled(store.roomName.isEmpty)
+                    .padding(.horizontal, 40)
+                    .padding(.bottom, 20)
                 }
-                .buttonStyle(.glassProminent)
-                .disabled(store.roomName.isEmpty)
-                .padding(.horizontal, 40)
-                .padding(.bottom, 20)
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -73,6 +79,6 @@ struct AddRoomSheetView: View {
                 isTextFieldFocused = true
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
     }
 }

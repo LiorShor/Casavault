@@ -188,7 +188,7 @@ struct PasswordDetailView: View {
                         Text(.localized(.room))
                             .foregroundStyle(.secondary)
                         Spacer()
-                        if let room = store.password.room {
+                        if let room = store.password.room, !store.pendingRoomDeletions.contains(room) {
                             Text(room)
                         } else {
                             Text(.localized(.noRoom))
