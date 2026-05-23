@@ -15,6 +15,9 @@ struct PasswordsUseCases {
     var addPassword: (Password) async -> Void
     var removePassword: (Password) async -> Void
     var updatePassword: (Password) async -> Void
+    var fetchRoomsForHome: (UUID?) async -> [String]
+    var renameRoom: (UUID?, String, String) async -> Void
+    var deleteRoom: (UUID?, String) async -> Void
 }
 
 extension PasswordsUseCases: DependencyKey {
@@ -58,9 +61,51 @@ extension PasswordsUseCases: DependencyKey {
             } catch {
                 // Handle error if needed
             }
+        },
+        fetchRoomsForHome: { homeId in
+            @Dependency(\.databaseService.context) var getContext
+            guard let context = try? getContext() else { return [] }
+            let fetchRequest: NSFetchRequest<Password> = NSFetchRequest(entityName: "Password")
+            if let homeId {
+                fetchRequest.predicate = NSPredicate(format: "homeId == %@", homeId as CVarArg)
+            }
+            let passwords = (try? context.fetch(fetchRequest)) ?? []
+            return Array(Set(passwords.compactMap { $0.room })).sorted()
+        },
+        renameRoom: { homeId, oldName, newName in
+            @Dependency(\.databaseService) var database
+            @Dependency(\.databaseService.context) var getContext
+            guard let context = try? getContext() else { return }
+            let fetchRequest: NSFetchRequest<Password> = NSFetchRequest(entityName: "Password")
+            var predicates: [NSPredicate] = [NSPredicate(format: "room == %@", oldName)]
+            if let homeId {
+                predicates.append(NSPredicate(format: "homeId == %@", homeId as CVarArg))
+            }
+            fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+            let passwords = (try? context.fetch(fetchRequest)) ?? []
+            for password in passwords {
+                password.room = newName
+            }
+            try? database.saveContext()
+        },
+        deleteRoom: { homeId, roomName in
+            @Dependency(\.databaseService) var database
+            @Dependency(\.databaseService.context) var getContext
+            guard let context = try? getContext() else { return }
+            let fetchRequest: NSFetchRequest<Password> = NSFetchRequest(entityName: "Password")
+            var predicates: [NSPredicate] = [NSPredicate(format: "room == %@", roomName)]
+            if let homeId {
+                predicates.append(NSPredicate(format: "homeId == %@", homeId as CVarArg))
+            }
+            fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+            let passwords = (try? context.fetch(fetchRequest)) ?? []
+            for password in passwords {
+                password.room = nil
+            }
+            try? database.saveContext()
         }
     )
-    
+
     static let testValue: PasswordsUseCases = .liveValue
 }
 

@@ -79,8 +79,12 @@ struct SettingsView: View {
                                             if store.accentColorName == appColor.rawValue {
                                                 Image(systemName: "checkmark")
                                                     .font(.system(size: 11, weight: .bold))
-                                                    .foregroundStyle(.white)
+                                                    .foregroundStyle(appColor.checkmarkColor)
                                             }
+                                        }
+                                        .overlay {
+                                            Circle()
+                                                .strokeBorder(Color.primary.opacity(appColor == .monochrome ? 0.2 : 0), lineWidth: 1)
                                         }
                                         .shadow(color: .black.opacity(0.15), radius: 2, x: 0, y: 1)
                                 }
@@ -180,6 +184,17 @@ struct SettingsView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
+                    Button {
+                        store.send(.view(.onContactButtonTapped))
+                    } label: {
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                                .foregroundStyle(Color.accentColor)
+                                .frame(width: 24)
+                            Text(.localized(.contactUs))
+                                .foregroundStyle(.primary)
+                        }
+                    }
                 } header: {
                     Text(.localized(.support))
                 }
@@ -200,7 +215,6 @@ struct SettingsView: View {
                 }
             }
         }
-        .preferredColorScheme(store.selectedTheme.colorScheme)
         .tint(Color.appAccentColor(named: store.accentColorName))
     }
 }

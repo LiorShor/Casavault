@@ -40,13 +40,14 @@ struct HomeKitImport {
 
         // Check if a device already has a password saved.
         // HomeKit UUIDs (uniqueIdentifier) change on every reinstall, so UUID match alone is not enough.
-        // Falls back to name matching, preferring passwords from the current home.
+        // Falls back to name matching within the current home only — cross-home name matches are
+        // intentionally ignored to avoid hiding devices that need to be imported into this home.
         func hasPassword(for device: HomeKitDevice) -> Password? {
             if let match = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier }) {
                 return match
             }
             let byName = existingPasswords.filter { $0.name == device.name }
-            return byName.first(where: { $0.homeId == currentHomeId }) ?? byName.first
+            return byName.first(where: { $0.homeId == currentHomeId })
         }
     }
     
@@ -245,11 +246,11 @@ struct HomeKitImport {
 
                 for device in selectedDevices {
                     // Match by homeKitUniqueIdentifier first; HomeKit UUIDs change on reinstall so
-                    // fall back to name matching, preferring the password from the current home.
+                    // fall back to name matching within the current home only. Cross-home matches are
+                    // skipped so devices with the same name in another home get a fresh password here.
                     let byName = existingPasswords.filter { $0.name == device.name }
                     let matched = existingPasswords.first(where: { $0.homeKitUniqueIdentifier == device.uniqueIdentifier })
                         ?? byName.first(where: { $0.homeId == currentHomeId })
-                        ?? byName.first
 
                     if let existingPassword = matched {
                         // Repair: set homeKitUniqueIdentifier if missing (legacy SwiftData passwords)
@@ -282,6 +283,17 @@ struct HomeKitImport {
                     }
                 }
                 
+                @Dependency(\.roomIconsService) var roomIconsService
+                var classifiedRooms = Set<String>()
+                for device in selectedDevices {
+                    guard let roomName = device.roomName, !classifiedRooms.contains(roomName) else { continue }
+                    classifiedRooms.insert(roomName)
+                    let icon = await classifyRoomIcon(roomName: roomName)
+                    roomIconsService.markRoomRestored(roomName, currentHomeId)
+                    roomIconsService.addCustomRoom(roomName, currentHomeId)
+                    roomIconsService.setIcon(icon, roomName, currentHomeId)
+                }
+
                 await send(.internal(.importCompleted))
             }
             

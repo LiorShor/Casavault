@@ -43,11 +43,13 @@ enum AppTheme: String, CaseIterable, Equatable {
         case .dark: return .dark
         }
     }
+
 }
 
 @Reducer
 struct Settings {
     @Dependency(\.passwordsUseCases) var passwordsUsecase
+    @Dependency(\.homeUseCases) var homeUseCases
     @Dependency(\.dismiss) var dismiss
     
     @ObservableState
@@ -79,6 +81,7 @@ struct Settings {
             case biometricLockToggled(Bool)
             case onOpenLanguageSettingsButtonTapped
             case onRateAppButtonTapped
+            case onContactButtonTapped
             case onDismiss
         }
         
@@ -143,7 +146,13 @@ struct Settings {
         case .onExportButtonTapped:
             state.isExportingPasswords = true
             return .run { send in
-                let passwords = await passwordsUsecase.fetchPasswords()
+                let homes = await homeUseCases.fetchHomes()
+                let validHomeIds = Set(homes.map { $0.id })
+                let allPasswords = await passwordsUsecase.fetchPasswords()
+                let passwords = allPasswords.filter { password in
+                    guard let homeId = password.homeId else { return true }
+                    return validHomeIds.contains(homeId)
+                }
                 let fileURL = await exportPasswords(passwords)
                 await send(.internal(.exportPasswordsCompleted(fileURL)))
             }
@@ -153,7 +162,13 @@ struct Settings {
                 AppStore.requestReview(in: scene)
             }
             return .none
-            
+
+        case .onContactButtonTapped:
+            if let url = URL(string: "mailto:liorshor123@gmail.com?subject=StorePass%20Feedback") {
+                UIApplication.shared.open(url)
+            }
+            return .none
+
         case .onDismiss:
             return .run { _ in
                 await dismiss()

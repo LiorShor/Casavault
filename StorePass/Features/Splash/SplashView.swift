@@ -47,12 +47,11 @@ struct SplashView: View {
             )
             .ignoresSafeArea()
             
-            VStack(spacing: 20) {
-                Image(systemName: "key.horizontal.fill")
+            VStack(spacing: 10) {
+                Image("splashLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 120, height: 120)
-                    .foregroundStyle(.white)
                 
                 Text(.localized(.appName))
                     .font(.largeTitle)
