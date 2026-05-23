@@ -117,6 +117,7 @@ struct PasswordsCollectionView: View {
                             systemImage: store.viewMode == .list ? "square.grid.2x2" : "list.bullet"
                         )
                     }
+
                 } label: {
                     Label(.localized(.options), systemImage: "ellipsis")
                 }
@@ -146,10 +147,16 @@ struct PasswordsCollectionView: View {
     @ViewBuilder
     private var listView: some View {
         List {
+            if !store.availableRooms.isEmpty || !store.availableDeviceTypes.isEmpty {
+                filterBarView
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+            }
             ForEach(store.sortedRoomNames, id: \.self) { roomName in
                 Section(header: store.groupingMode == .byRoom ? Text(roomName) : nil) {
                     ForEach(store.groupedPasswords[roomName] ?? []) { password in
-                        PasswordListRow(password: password) {
+                        PasswordListRow(password: password, pendingRoomDeletions: store.pendingRoomDeletions) {
                             if !store.isEditMode {
                                 store.send(.view(.onPasswordTap(password)))
                             }
@@ -174,6 +181,10 @@ struct PasswordsCollectionView: View {
     private var gridView: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 16, pinnedViews: [.sectionHeaders]) {
+                if !store.availableRooms.isEmpty || !store.availableDeviceTypes.isEmpty {
+                    filterBarView
+                        .padding(.horizontal, -16)
+                }
                 ForEach(store.sortedRoomNames, id: \.self) { roomName in
                     Section {
                         LazyVGrid(columns: [
@@ -183,7 +194,8 @@ struct PasswordsCollectionView: View {
                                 PasswordGridCard(
                                     password: password,
                                     isEditMode: store.isEditMode,
-                                    isDragging: store.draggingPassword?.id == password.id
+                                    isDragging: store.draggingPassword?.id == password.id,
+                                    pendingRoomDeletions: store.pendingRoomDeletions
                                 ) {
                                     if !store.isEditMode {
                                         store.send(.view(.onPasswordTap(password)))
@@ -234,13 +246,47 @@ struct PasswordsCollectionView: View {
                 store.send(.view(.toggleEditMode))
             }
         }
-        .simultaneousGesture(
-            TapGesture().onEnded { _ in
-                if store.isEditMode {
-                    store.send(.view(.toggleEditMode))
+        .onTapGesture {
+            if store.isEditMode {
+                store.send(.view(.toggleEditMode))
+            }
+        }
+    }
+}
+
+// MARK: - Filter Chip
+
+struct FilterChip: View {
+    let label: String?
+    let systemImage: String?
+    let isSelected: Bool
+    let action: () -> Void
+
+    @AppStorage("accentColorName") private var accentColorName = Color.AppColor.blue.rawValue
+
+    private var selectedForegroundColor: Color {
+        Color.AppColor(rawValue: accentColorName)?.checkmarkColor ?? .white
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                        .font(.subheadline)
+                }
+                if let label {
+                    Text(label)
+                        .font(.subheadline)
                 }
             }
-        )
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+            .foregroundStyle(isSelected ? selectedForegroundColor : Color.primary)
+            .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -248,8 +294,9 @@ struct PasswordsCollectionView: View {
 
 struct PasswordListRow: View {
     let password: Password
+    var pendingRoomDeletions: Set<String> = []
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack {
@@ -260,12 +307,12 @@ struct PasswordListRow: View {
                         .foregroundStyle(Color.accentColor)
                         .frame(width: 32)
                 }
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(password.name)
-                        .font(.headline)
-                    
-                    if let room = password.room {
+                        .font(.subheadline)
+
+                    if let room = password.room, !pendingRoomDeletions.contains(room) {
                         Text(room)
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -291,6 +338,7 @@ struct PasswordGridCard: View {
     let password: Password
     let isEditMode: Bool
     let isDragging: Bool
+    var pendingRoomDeletions: Set<String> = []
     let onTap: () -> Void
     let onDelete: () -> Void
     
@@ -303,6 +351,7 @@ struct PasswordGridCard: View {
                     ZStack(alignment: .topTrailing) {
                         RoundedRectangle(cornerRadius: 12)
                             .fill(Color(.secondarySystemGroupedBackground))
+                            .strokeBorder(Color.accentColor, lineWidth: 1)
                         
                         // Warning icon overlay (only when not in edit mode)
                         if password.value.isEmpty && !isEditMode {
@@ -321,18 +370,14 @@ struct PasswordGridCard: View {
                                     .foregroundStyle(Color.accentColor)
                             }
                             Text(password.name)
-                                .font(.headline)
+                                .font(.subheadline)
                                 .multilineTextAlignment(.center)
                                 .foregroundStyle(.primary)
                         }
                         .padding(8)
                     )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.accentColor, lineWidth: 1.5)
-                    )
 
-                    if let room = password.room {
+                    if let room = password.room, !pendingRoomDeletions.contains(room) {
                         Text(room)
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -363,30 +408,31 @@ struct PasswordGridCard: View {
             if isEditMode {
                 // Small random delay for staggered effect
                 try? await Task.sleep(nanoseconds: UInt64(Double.random(in: 0...100_000_000)))
-                
+
                 // Continuous wiggle animation
                 while !Task.isCancelled && isEditMode {
                     await wiggle()
                 }
-            } else {
-                // Reset angle immediately when exiting edit mode
-                withAnimation(.easeOut(duration: 0.2)) {
-                    wiggleAngle = 0
-                }
+            }
+            // Always reset — runs whether edit mode ended normally or task was cancelled mid-wiggle
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                wiggleAngle = 0
             }
         }
     }
-    
+
     private func wiggle() async {
+        guard !Task.isCancelled else { return }
         withAnimation(.easeInOut(duration: 0.1)) {
-            wiggleAngle = -2
+            wiggleAngle = -1.5
         }
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.15 seconds
-        
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        guard !Task.isCancelled else { return }
         withAnimation(.easeInOut(duration: 0.1)) {
-            wiggleAngle = 2
+            wiggleAngle = 1.5
         }
-        try? await Task.sleep(nanoseconds: 100_000_000) // 0.15 seconds
+        try? await Task.sleep(nanoseconds: 100_000_000)
     }
 }
 
@@ -427,6 +473,52 @@ struct PasswordDropDelegate: DropDelegate {
 }
 
 extension PasswordsCollectionView {
+    @ViewBuilder
+    var filterBarView: some View {
+        let hasFilters = !store.availableRooms.isEmpty || !store.availableDeviceTypes.isEmpty
+        if hasFilters {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    FilterChip(
+                        label: String.localized(.filterAll),
+                        systemImage: nil,
+                        isSelected: store.selectedFilter == nil
+                    ) {
+                        store.send(.view(.filterChanged(nil)))
+                    }
+
+                    if !store.availableRooms.isEmpty {
+                        Divider().frame(height: 20)
+                        ForEach(store.availableRooms, id: \.self) { room in
+                            FilterChip(
+                                label: room,
+                                systemImage: store.roomIcons[room] ?? "door.left.hand.open",
+                                isSelected: store.selectedFilter == .room(room)
+                            ) {
+                                store.send(.view(.filterChanged(.room(room))))
+                            }
+                        }
+                    }
+
+                    if !store.availableDeviceTypes.isEmpty {
+                        Divider().frame(height: 20)
+                        ForEach(store.availableDeviceTypes, id: \.self) { icon in
+                            FilterChip(
+                                label: nil,
+                                systemImage: icon,
+                                isSelected: store.selectedFilter == .deviceType(icon)
+                            ) {
+                                store.send(.view(.filterChanged(.deviceType(icon))))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+        }
+    }
+
     @ViewBuilder
     private var noHomeView: some View {
         VStack(spacing: 20) {

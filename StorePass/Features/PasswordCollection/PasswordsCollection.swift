@@ -11,11 +11,17 @@ import ComposableArchitecture
 import SwiftData
 import SwiftUI
 
+enum PasswordFilter: Equatable, Hashable {
+    case room(String)
+    case deviceType(String)
+}
+
 @Reducer
 struct PasswordsCollection {
     @Dependency(\.passwordsUseCases) var passwordsUsecase
     @Dependency(\.homeUseCases) var homeUseCases
-    
+    @Dependency(\.roomIconsService) var roomIconsService
+
     @ObservableState
     struct State: Equatable {
         var passwords: [Password] = []
@@ -26,27 +32,50 @@ struct PasswordsCollection {
         var isEditMode: Bool = false
         var draggingPassword: Password?
         var searchText: String = ""
-        
+        var selectedFilter: PasswordFilter? = nil
+        var roomIcons: [String: String] = [:]
+        var pendingRoomDeletions: Set<String> = []
+
         var currentHome: Home? {
             availableHomes.first(where: { $0.id == currentHomeId })
         }
-        
+
         var hasNoHome: Bool {
             currentHomeId == nil
         }
-        
-        // Filter passwords based on search text
-        var filteredPasswords: [Password] {
-            guard !searchText.isEmpty else {
-                return passwords
-            }
-            
-            return passwords.filter { password in
-                password.name.localizedCaseInsensitiveContains(searchText) ||
-                (password.room?.localizedCaseInsensitiveContains(searchText) ?? false)
-            }
+
+        var availableRooms: [String] {
+            Array(Set(passwords.compactMap { $0.room }).subtracting(pendingRoomDeletions)).sorted()
         }
-        
+
+        var availableDeviceTypes: [String] {
+            Array(Set(passwords.compactMap { $0.icon })).sorted()
+        }
+
+        var filteredPasswords: [Password] {
+            var result = passwords
+
+            if !searchText.isEmpty {
+                result = result.filter { password in
+                    password.name.localizedCaseInsensitiveContains(searchText) ||
+                    (password.room?.localizedCaseInsensitiveContains(searchText) ?? false)
+                }
+            }
+
+            if let filter = selectedFilter {
+                switch filter {
+                case .room(let roomName):
+                    if !pendingRoomDeletions.contains(roomName) {
+                        result = result.filter { ($0.room ?? "") == roomName }
+                    }
+                case .deviceType(let icon):
+                    result = result.filter { $0.icon == icon }
+                }
+            }
+
+            return result
+        }
+
         init(passwords: [Password] = [], currentHomeId: UUID? = nil, availableHomes: [Home] = [], viewMode: PasswordViewMode = .list, groupingMode: PasswordGroupingMode = .all, searchText: String = "") {
             self.passwords = passwords
             self.currentHomeId = currentHomeId
@@ -66,7 +95,8 @@ struct PasswordsCollection {
             
             var grouped: [String: [Password]] = [:]
             for password in passwordsToGroup {
-                let roomName = password.room ?? String.localized(.noRoom)
+                let effectiveRoom = password.room.flatMap { pendingRoomDeletions.contains($0) ? nil : $0 }
+                let roomName = effectiveRoom ?? String.localized(.noRoom)
                 if grouped[roomName] == nil {
                     grouped[roomName] = []
                 }
@@ -103,6 +133,7 @@ struct PasswordsCollection {
             case onAppear
             case homeSelected(UUID)
             case searchTextChanged(String)
+            case filterChanged(PasswordFilter?)
         }
         
         @CasePathable
@@ -135,10 +166,23 @@ struct PasswordsCollection {
 //                //                return .send(.navigation(.onAddPassword))
                 
             case let .itemsLoaded(passwords):
+                print("[PasswordsCollection] itemsLoaded: \(passwords.count) passwords, pendingDeletions=\(state.pendingRoomDeletions)")
+                for p in passwords { print("[PasswordsCollection]   • \(p.name) room=\(p.room ?? "nil")") }
                 state.passwords = passwords
+                let rooms = Array(Set(passwords.compactMap { $0.room }))
+                let homeId = state.currentHomeId
+                state.roomIcons = rooms.reduce(into: [:]) { dict, room in
+                    if let icon = roomIconsService.getIcon(room, homeId) {
+                        dict[room] = icon
+                    }
+                }
+                print("[PasswordsCollection] after itemsLoaded: pendingDeletions=\(state.pendingRoomDeletions), effectiveRooms=\(state.availableRooms)")
                 return .none
                 
             case let .defaultHomeLoaded(home):
+                if state.currentHomeId != home?.id {
+                    state.pendingRoomDeletions = roomIconsService.getDeletedRooms(home?.id)
+                }
                 state.currentHomeId = home?.id
                 // Reload passwords for the new home
                 if let homeId = home?.id {
@@ -157,6 +201,7 @@ struct PasswordsCollection {
 
             case .remoteStoreChanged:
                 let currentHomeId = state.currentHomeId
+                print("[PasswordsCollection] remoteStoreChanged — pendingDeletions=\(state.pendingRoomDeletions)")
                 return .run { @MainActor send in
                     let homes = await homeUseCases.fetchHomes()
                     send(.homesLoaded(homes))
@@ -195,7 +240,8 @@ struct PasswordsCollection {
             
         case let .homeSelected(homeId):
             state.currentHomeId = homeId
-            // Reload passwords for the selected home
+            state.selectedFilter = nil
+            state.pendingRoomDeletions = roomIconsService.getDeletedRooms(homeId)
             return .run { @MainActor [homeId] send in
                 let passwords = await passwordsUsecase.fetchPasswordsForHome(homeId)
                 send(.itemsLoaded(passwords))
@@ -307,6 +353,10 @@ struct PasswordsCollection {
             
         case let .searchTextChanged(text):
             state.searchText = text
+            return .none
+
+        case let .filterChanged(filter):
+            state.selectedFilter = filter
             return .none
         }
     }
