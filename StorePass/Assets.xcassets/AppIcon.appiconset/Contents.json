@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "appicondark-iOS-Default-1024x1024@1x 1.png",
+      "filename" : "StorePass-HomeKit-Light-1024.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "appicondark-iOS-Dark-1024x1024@1x.png",
+      "filename" : "StorePass-HomeKit-Dark-1024.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "appicondark-iOS-Default-1024x1024@1xmono.png",
+      "filename" : "StorePass-HomeKit-Dark-1024 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

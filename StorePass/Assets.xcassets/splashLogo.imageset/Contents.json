@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "StorePass_Light_BG_iPhone.pdf",
+      "filename" : "StorePass-Shield-Light.pdf",
       "idiom" : "universal"
     },
     {
@@ -11,7 +11,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "StorePass_Dark_BG_Clean.pdf",
+      "filename" : "StorePass-Shield-Dark.pdf",
       "idiom" : "universal"
     }
   ],
