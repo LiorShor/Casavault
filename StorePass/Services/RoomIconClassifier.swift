@@ -1,6 +1,6 @@
 //
 //  RoomIconClassifier.swift
-//  StorePass
+//  CasaVault
 //
 
 import Foundation

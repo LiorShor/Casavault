@@ -1,6 +1,6 @@
 //
 //  StorePassApp.swift
-//  StorePass
+//  CasaVault
 //
 //  Created by Lior Shor on 15/01/2026.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 
 @main
-struct StorePassApp: App {
+struct CasaVaultApp: App {
     @AppStorage("selectedTheme") private var selectedTheme = "system"
     @AppStorage("selectedLanguage") private var selectedLanguage = "en"
     @AppStorage("accentColorName") private var accentColorName = Color.AppColor.blue.rawValue

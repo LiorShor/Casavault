@@ -1,6 +1,6 @@
 //
 //  CoreDataStack.swift
-//  StorePass
+//  CasaVault
 //
 //  Created by Claude on 13/03/2026.
 //

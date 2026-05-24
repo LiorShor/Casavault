@@ -1,6 +1,6 @@
 //
 //  Settings.swift
-//  StorePass
+//  CasaVault
 //
 //  Created by Lior Shor on 25/01/2026.
 //
@@ -164,7 +164,7 @@ struct Settings {
             return .none
 
         case .onContactButtonTapped:
-            if let url = URL(string: "mailto:liorshor123@gmail.com?subject=StorePass%20Feedback") {
+            if let url = URL(string: "mailto:liorshor123@gmail.com?subject=CasaVault%20Feedback") {
                 UIApplication.shared.open(url)
             }
             return .none

@@ -1,6 +1,6 @@
 //
 //  DeviceCollectionFeature.swift
-//  StorePass
+//  CasaVault
 //
 //  Created by Lior Shor on 11/07/2025.
 //

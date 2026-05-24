@@ -6,13 +6,5 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-	<key>NSHomeKitUsageDescription</key>
-	<string>This app needs access to your HomeKit devices to import them and help you manage their passwords securely.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>StorePass uses Face ID to protect your device setup codes.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app needs access to your camera to take photos of passwords and barcodes.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to attach images to your passwords.</string>
 </dict>
 </plist>

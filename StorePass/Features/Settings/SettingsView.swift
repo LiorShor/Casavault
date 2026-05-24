@@ -1,6 +1,6 @@
 //
 //  SettingsView.swift
-//  StorePass
+//  CasaVault
 //
 //  Created by Lior Shor on 25/01/2026.
 //
