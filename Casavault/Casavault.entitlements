@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array>
-		<string>iCloud.com.shor.StorePass</string>
+		<string>iCloud.com.shor.Casavault</string>
 	</array>
 	<key>com.apple.developer.icloud-services</key>
 	<array>

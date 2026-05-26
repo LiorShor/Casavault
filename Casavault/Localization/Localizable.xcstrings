@@ -873,91 +873,91 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass"
+            "value": "Casavault"
           }
         }
       }
@@ -1353,91 +1353,91 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass entsperren"
+            "value": "Casavault entsperren"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock StorePass"
+            "value": "Unlock Casavault"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquear StorePass"
+            "value": "Desbloquear Casavault"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Déverrouiller StorePass"
+            "value": "Déverrouiller Casavault"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "פתח את StorePass"
+            "value": "פתח את Casavault"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sblocca StorePass"
+            "value": "Sblocca Casavault"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass をロック解除"
+            "value": "Casavault をロック解除"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass 잠금 해제"
+            "value": "Casavault 잠금 해제"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass ontgrendelen"
+            "value": "Casavault ontgrendelen"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Odblokuj StorePass"
+            "value": "Odblokuj Casavault"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Desbloquear StorePass"
+            "value": "Desbloquear Casavault"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Разблокировать StorePass"
+            "value": "Разблокировать Casavault"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lås upp StorePass"
+            "value": "Lås upp Casavault"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass'i aç"
+            "value": "Casavault'i aç"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "解锁 StorePass"
+            "value": "解锁 Casavault"
           }
         }
       }
@@ -4704,91 +4704,91 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass benötigt Zugriff auf HomeKit, um Ihre Geräte zu importieren. Öffnen Sie die Einstellungen, um den Zugriff zu aktivieren."
+            "value": "Casavault benötigt Zugriff auf HomeKit, um Ihre Geräte zu importieren. Öffnen Sie die Einstellungen, um den Zugriff zu aktivieren."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass needs access to HomeKit to import your devices. Open Settings to enable access."
+            "value": "Casavault needs access to HomeKit to import your devices. Open Settings to enable access."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass necesita acceso a HomeKit para importar sus dispositivos. Abra Configuración para habilitar el acceso."
+            "value": "Casavault necesita acceso a HomeKit para importar sus dispositivos. Abra Configuración para habilitar el acceso."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass a besoin d'accéder à HomeKit pour importer vos appareils. Ouvrez les Réglages pour activer l'accès."
+            "value": "Casavault a besoin d'accéder à HomeKit pour importer vos appareils. Ouvrez les Réglages pour activer l'accès."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass צריך גישה ל-HomeKit כדי לייבא את המכשירים שלך. עבור להגדרות כדי לאפשר גישה."
+            "value": "Casavault צריך גישה ל-HomeKit כדי לייבא את המכשירים שלך. עבור להגדרות כדי לאפשר גישה."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass necessita l'accesso a HomeKit per importare i tuoi dispositivi. Apri le Impostazioni per abilitare l'accesso."
+            "value": "Casavault necessita l'accesso a HomeKit per importare i tuoi dispositivi. Apri le Impostazioni per abilitare l'accesso."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass がデバイスをインポートするには HomeKit へのアクセスが必要です。設定を開いてアクセスを有効にしてください。"
+            "value": "Casavault がデバイスをインポートするには HomeKit へのアクセスが必要です。設定を開いてアクセスを有効にしてください。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass가 기기를 가져오려면 HomeKit 접근이 필요합니다. 설정을 열어 접근을 활성화하세요."
+            "value": "Casavault가 기기를 가져오려면 HomeKit 접근이 필요합니다. 설정을 열어 접근을 활성화하세요."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass heeft toegang tot HomeKit nodig om uw apparaten te importeren. Open Instellingen om toegang in te schakelen."
+            "value": "Casavault heeft toegang tot HomeKit nodig om uw apparaten te importeren. Open Instellingen om toegang in te schakelen."
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass potrzebuje dostępu do HomeKit, aby importować Twoje urządzenia. Otwórz Ustawienia, aby włączyć dostęp."
+            "value": "Casavault potrzebuje dostępu do HomeKit, aby importować Twoje urządzenia. Otwórz Ustawienia, aby włączyć dostęp."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O StorePass precisa de acesso ao HomeKit para importar seus dispositivos. Abra as Configurações para ativar o acesso."
+            "value": "O Casavault precisa de acesso ao HomeKit para importar seus dispositivos. Abra as Configurações para ativar o acesso."
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass требует доступа к HomeKit для импорта ваших устройств. Откройте Настройки, чтобы включить доступ."
+            "value": "Casavault требует доступа к HomeKit для импорта ваших устройств. Откройте Настройки, чтобы включить доступ."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass behöver åtkomst till HomeKit för att importera dina enheter. Öppna Inställningar för att aktivera åtkomst."
+            "value": "Casavault behöver åtkomst till HomeKit för att importera dina enheter. Öppna Inställningar för att aktivera åtkomst."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass, cihazlarınızı içe aktarmak için HomeKit'e erişim gerektirir. Erişimi etkinleştirmek için Ayarları açın."
+            "value": "Casavault, cihazlarınızı içe aktarmak için HomeKit'e erişim gerektirir. Erişimi etkinleştirmek için Ayarları açın."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass 需要访问 HomeKit 才能导入您的设备。前往设置以启用访问权限。"
+            "value": "Casavault 需要访问 HomeKit 才能导入您的设备。前往设置以启用访问权限。"
           }
         }
       }
@@ -8351,91 +8351,91 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass bewerten"
+            "value": "Casavault bewerten"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rate StorePass"
+            "value": "Rate Casavault"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Calificar StorePass"
+            "value": "Calificar Casavault"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Évaluer StorePass"
+            "value": "Évaluer Casavault"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "דרג את StorePass"
+            "value": "דרג את Casavault"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Valuta StorePass"
+            "value": "Valuta Casavault"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass を評価"
+            "value": "Casavault を評価"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass 평가하기"
+            "value": "Casavault 평가하기"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Beoordeel StorePass"
+            "value": "Beoordeel Casavault"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Oceń StorePass"
+            "value": "Oceń Casavault"
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Avaliar StorePass"
+            "value": "Avaliar Casavault"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Оценить StorePass"
+            "value": "Оценить Casavault"
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Betygsätt StorePass"
+            "value": "Betygsätt Casavault"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "StorePass'i değerlendir"
+            "value": "Casavault'i değerlendir"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "给 StorePass 评分"
+            "value": "给 Casavault 评分"
           }
         }
       }
