@@ -163,6 +163,7 @@ struct SettingsView: View {
                                     .foregroundStyle(.primary)
                             }
                         }
+                        .tint(Color.AppColor(rawValue: store.accentColorName)?.toggleTintColor ?? Color.appAccentColor(named: store.accentColorName))
                     } header: {
                         Text(.localized(.security))
                     } footer: {

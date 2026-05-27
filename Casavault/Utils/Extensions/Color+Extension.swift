@@ -37,6 +37,16 @@ extension Color {
             default: return .white
             }
         }
+
+        // Toggle tint — avoids white-on-white in dark mode for monochrome
+        var toggleTintColor: Color {
+            switch self {
+            case .monochrome:
+                return Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? .systemGray2 : .black })
+            default:
+                return color
+            }
+        }
     }
 
     init(_ resource: AppColor) {
