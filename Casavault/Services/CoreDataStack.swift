@@ -21,7 +21,7 @@ class CoreDataStack {
         // Create the model programmatically
         let model = createModel()
         
-        let container = NSPersistentCloudKitContainer(name: "StorePass", managedObjectModel: model)
+        let container = NSPersistentCloudKitContainer(name: "Casavault", managedObjectModel: model)
         
         // Configure for CloudKit
         guard let description = container.persistentStoreDescriptions.first else {
@@ -29,7 +29,7 @@ class CoreDataStack {
         }
         
         description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-            containerIdentifier: "iCloud.com.shor.StorePass"
+            containerIdentifier: "iCloud.com.shor.Casavault"
         )
 
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)

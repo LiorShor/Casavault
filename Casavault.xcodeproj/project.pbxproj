@@ -43,7 +43,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		BA75DBF12F194A7800816228 /* Exceptions for "StorePass" folder in "Casavault" target */ = {
+		BA75DBF12F194A7800816228 /* Exceptions for "Casavault" folder in "Casavault" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -53,17 +53,17 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		BA68BA882FBB5C390020849F /* StorePassTests */ = {
+		BA68BA882FBB5C390020849F /* CasavaultTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = StorePassTests;
+			path = CasavaultTests;
 			sourceTree = "<group>";
 		};
-		BA75DBE62F194A7600816228 /* StorePass */ = {
+		BA75DBE62F194A7600816228 /* Casavault */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				BA75DBF12F194A7800816228 /* Exceptions for "StorePass" folder in "Casavault" target */,
+				BA75DBF12F194A7800816228 /* Exceptions for "Casavault" folder in "Casavault" target */,
 			);
-			path = StorePass;
+			path = Casavault;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -99,8 +99,8 @@
 		BA75DBDB2F194A7600816228 = {
 			isa = PBXGroup;
 			children = (
-				BA75DBE62F194A7600816228 /* StorePass */,
-				BA68BA882FBB5C390020849F /* StorePassTests */,
+				BA75DBE62F194A7600816228 /* Casavault */,
+				BA68BA882FBB5C390020849F /* CasavaultTests */,
 				BA68BA9A2FBC18670020849F /* Frameworks */,
 				BA75DBE52F194A7600816228 /* Products */,
 			);
@@ -133,7 +133,7 @@
 				BA68BA8C2FBB5C390020849F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				BA68BA882FBB5C390020849F /* StorePassTests */,
+				BA68BA882FBB5C390020849F /* CasavaultTests */,
 			);
 			name = CasavaultTests;
 			packageProductDependencies = (
@@ -156,7 +156,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				BA75DBE62F194A7600816228 /* StorePass */,
+				BA75DBE62F194A7600816228 /* Casavault */,
 			);
 			name = Casavault;
 			packageProductDependencies = (
@@ -194,6 +194,19 @@
 				en,
 				Base,
 				he,
+				"zh-Hans",
+				ko,
+				tr,
+				sv,
+				es,
+				ru,
+				"pt-BR",
+				pl,
+				ja,
+				it,
+				de,
+				fr,
+				nl,
 			);
 			mainGroup = BA75DBDB2F194A7600816228;
 			minimizedProjectReferenceProxies = 1;
@@ -306,16 +319,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = StorePass/StorePass.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Casavault/Casavault.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LMNQ8K7V9N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = StorePass/Info.plist;
+				INFOPLIST_FILE = Casavault/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to your camera to take photos of passwords and barcodes.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "StorePass uses Face ID to protect your device setup codes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Casavault uses Face ID to protect your device setup codes.";
 				INFOPLIST_KEY_NSHomeKitUsageDescription = "This app needs access to your HomeKit devices to import them and help you manage their passwords securely.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to attach images to your passwords.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -328,7 +341,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shor.Casavault;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -348,16 +361,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = StorePass/StorePass.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Casavault/Casavault.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = LMNQ8K7V9N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = StorePass/Info.plist;
+				INFOPLIST_FILE = Casavault/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs access to your camera to take photos of passwords and barcodes.";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "StorePass uses Face ID to protect your device setup codes.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Casavault uses Face ID to protect your device setup codes.";
 				INFOPLIST_KEY_NSHomeKitUsageDescription = "This app needs access to your HomeKit devices to import them and help you manage their passwords securely.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to attach images to your passwords.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -370,7 +383,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shor.Casavault;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -552,8 +565,10 @@
 			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.23.1;
+				minimumVersion = 1.23.2;
 			};
+			traits = (
+			);
 		};
 		BA86A0662F196151004BC59C /* XCRemoteSwiftPackageReference "swift-localization" */ = {
 			isa = XCRemoteSwiftPackageReference;

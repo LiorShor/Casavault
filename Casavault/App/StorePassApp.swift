@@ -1,5 +1,5 @@
 //
-//  StorePassApp.swift
+//  CasavaultApp.swift
 //  CasaVault
 //
 //  Created by Lior Shor on 15/01/2026.

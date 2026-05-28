@@ -1,5 +1,5 @@
 //
-//  StorePassTests.swift
+//  CasavaultTests.swift
 //  CasaVaultTests
 //
 //  Created by Lior Shor on 18/05/2026.

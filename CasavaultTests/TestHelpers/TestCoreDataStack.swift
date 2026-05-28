@@ -1,11 +1,11 @@
 import CoreData
-@testable import StorePass
+@testable import Casavault
 
 // MARK: - In-memory Core Data stack
 
 enum TestCoreDataStack {
     static func makeContext() -> NSManagedObjectContext {
-        let container = NSPersistentContainer(name: "StorePassTests", managedObjectModel: makeModel())
+        let container = NSPersistentContainer(name: "CasavaultTests", managedObjectModel: makeModel())
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [description]

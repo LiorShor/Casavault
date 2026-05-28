@@ -1,7 +1,7 @@
 import Testing
 import ComposableArchitecture
 import CoreData
-@testable import StorePass
+@testable import Casavault
 
 @Suite("HomesCollection")
 @MainActor
